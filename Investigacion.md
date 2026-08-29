@@ -1,0 +1,5 @@
+# Proyecto fase 2: pagina de asignación de la Universidad del Valle de Guatemala.
+
+- ¿Qué framework vamos a utilizar?
+
+Para el backend decidimos irnos por Spring Boot. Sabemos que hoy en día es lo que usan las empresas grandes y los emprendimientos para hacer sistemas que de verdad aguanten. Como grupo nunca habíamos trabajado un proyecto en este framework, pero ya lo conocíamos y nos pareció una herramienta interesante ya que aparte de la importancia de Spring Boot en grandes empresas, este proyecto nos ayudará a poder conocer más de la herramienta para trabajos futuros, por lo que no solo nos va a ayudar a que la página de asignaciones sea mucho más rápida y deje de trabarse, sino que es una gran oportunidad para nosotros. Queremos aprender cómo trabajan las empresas en la vida real, como es que las empresas logran resultados tan buenos y todo eso creemos que nos lo da Java con Spring Boot.

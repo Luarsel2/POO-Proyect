@@ -1,10 +1,12 @@
 public class Curso {
     private String nombre;
     private int creditos;
+    private Estudiante estudiante;
 
-    public Curso(String nombre, int creditos){
+    public Curso(String nombre, int creditos, Estudiante estudiante){
         this.nombre = nombre;
         this.creditos = creditos;
+        this.estudiante = estudiante;
     }
 
     public String getNombre(){
@@ -19,5 +21,12 @@ public class Curso {
     }
     public void setCreditos(int creditos){
         this.creditos = creditos;
+    }
+
+    public Estudiante getEstudiante(){
+        return estudiante;
+    }
+    public void setEstudiante(Estudiante estudiante){
+        this.estudiante = estudiante;
     }
 }

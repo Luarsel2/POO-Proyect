@@ -4,13 +4,15 @@ public class Estudiante extends Persona {
     private int fechaIngreso;
     private String estado;
     private double promedioGeneral;
+    private Inscripcion inscripcion;
     // constructor
-    public Estudiante(int id, String nombre, String apellido, String fechaNacimiento, String correo, int telefono, String direccion, int carnet, int fechaIngreso, String estado, double promedioGeneral){
+    public Estudiante(int id, String nombre, String apellido, String fechaNacimiento, String correo, int telefono, String direccion, int carnet, int fechaIngreso, String estado, double promedioGeneral, Inscripcion inscripcion){
         super(id, nombre, apellido, fechaNacimiento, correo, telefono, direccion);
         this.carnet = carnet;
         this.fechaIngreso = fechaIngreso;
         this.estado = estado;
         this.promedioGeneral = promedioGeneral;
+        this.inscripcion = inscripcion;
     }
     
     //  Metodos
@@ -57,5 +59,12 @@ public class Estudiante extends Persona {
     }
     public void setPromedioGeneral(double promedioGeneral){
         this.promedioGeneral = promedioGeneral;
+    }
+
+    public Inscripcion getInscripcion(){
+        return inscripcion;
+    }
+    public void setInscripcion(Inscripcion inscripcion){
+        this.inscripcion = inscripcion;
     }
 }

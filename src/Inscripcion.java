@@ -1,16 +1,30 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Inscripcion {
     private int id;
     private String fechaDeInscripcion;
     private String estado;
     private int totalCreditos;
     private Estudiante estudiante; // Relacion con la clase estudiante
+    private PeriodoAcademico periodoAcademico;
+    // Composicion - Inscripcion posee lista con detalles
+    private List<DetalleInscripcion> detalles;
 
-    public Inscripcion(int id, String fechadeInscripcion, String estado, int totalCreditos, Estudiante estudiante){
+    public Inscripcion(int id, String fechadeInscripcion, String estado, int totalCreditos, Estudiante estudiante, PeriodoAcademico periodoAcademico){
         this.id = id;
         this.fechaDeInscripcion = fechadeInscripcion;
         this.estado = estado;
         this.totalCreditos = totalCreditos;
         this.estudiante = estudiante;
+        this.periodoAcademico = periodoAcademico;
+        this.detalles = new ArrayList<>(); // empieza vacia la lista
+    }
+
+    // Metodo para composicion - Agrega el detalle directo a la inscripcion
+    public void agregarDetalle(int id, String fechaInscripcion, String estado, Seccion seccion){
+        DetalleInscripcion detalle = new DetalleInscripcion(id, fechaInscripcion, estado, seccion);
+        this.detalles.add(detalle);
     }
     
     public void asignarSeccion(){
@@ -59,4 +73,16 @@ public class Inscripcion {
     public void setEstudiante(Estudiante estudiante){
         this.estudiante = estudiante;
     }
+
+    public PeriodoAcademico getPeriodoAcademico(){
+        return periodoAcademico;
+    }
+    public void setPeriodoAcademico(PeriodoAcademico periodoAcademico){
+        this.periodoAcademico = periodoAcademico;
+    }
+
+    public List<DetalleInscripcion> getDetalles(){
+        return detalles;
+    }
+
 }

@@ -1,12 +1,14 @@
 public class Profesor extends Empleado {
     private String especialidad;
     private String materias;
+    private Seccion seccion;
 
-    public Profesor(int id, String nombre, String apellido, String fechaNacimiento, String correo,int telefono, String direccion, int codigoDeEmpleado, String fechaDeContratacion, String especialidad, String materias){
+    public Profesor(int id, String nombre, String apellido, String fechaNacimiento, String correo,int telefono, String direccion, int codigoDeEmpleado, String fechaDeContratacion, String especialidad, String materias, Seccion seccion){
         super(id, nombre, apellido, fechaNacimiento, correo, telefono, direccion, codigoDeEmpleado, fechaDeContratacion);
         
         this.especialidad = especialidad;
         this.materias = materias;
+        this.seccion = seccion;
     }
 
     public void asignarNota(){
@@ -28,6 +30,13 @@ public class Profesor extends Empleado {
     }
     public void setMaterias(String materias){
         this.materias = materias;
+    }
+
+    public Seccion getSeccion(){
+        return seccion;
+    }
+    public void setSeccion(Seccion seccion){
+        this.seccion = seccion;
     }
 
 }

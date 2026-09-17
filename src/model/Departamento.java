@@ -1,3 +1,4 @@
+package model;
 public class Departamento {
     private String nombre;
 

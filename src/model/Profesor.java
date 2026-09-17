@@ -1,3 +1,5 @@
+package model;
+
 public class Profesor extends Empleado {
     private String especialidad;
     private String materias;

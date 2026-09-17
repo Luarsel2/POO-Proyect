@@ -1,3 +1,4 @@
+package model;
 public class DetalleInscripcion {
     private int idDetalle;
     private String fechaInscripcion;

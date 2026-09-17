@@ -1,3 +1,4 @@
+package model;
 public class Administracion extends Empleado{
     private String puesto;
     private String departamento;

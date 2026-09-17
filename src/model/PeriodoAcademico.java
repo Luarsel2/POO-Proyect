@@ -1,3 +1,4 @@
+package model;
 public class PeriodoAcademico {
     private int idPeriodo;
     private String nombre;

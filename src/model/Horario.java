@@ -1,3 +1,4 @@
+package model;
 public class Horario {
     private int idHorario;
     private String diaSemana;

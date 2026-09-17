@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Portal Universitario - Inscripción</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container my-5">
+        <h2 class="mb-4">Sistema de Gestión Universitaria</h2>
+        
+        <div class="card p-4 shadow-sm">
+            <h4 class="card-title">Inscribir Estudiante</h4>
+            <form action="/inscribir" method="POST">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Carnet Estudiante</label>
+                        <input type="text" class="form-control" name="carnet" placeholder="2026001" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Curso</label>
+                        <select class="form-select" name="idCurso">
+                            <option value="1">Programación Orientada a Objetos</option>
+                            <option value="2">Lógica de Sistemas</option>
+                        </select>
+                    </div>
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-primary">Procesar Inscripción</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

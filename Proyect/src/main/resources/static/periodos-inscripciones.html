@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Períodos e Inscripciones - Portal Universitario UVG</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Portal de Gestión Universitaria</h1>
+      <span class="subtitulo">Prototipo POO · Universidad del Valle de Guatemala</span>
+    </div>
+  </header>
+
+  <nav class="menu">
+    <a href="index.html">Inicio</a>
+    <a href="estudiantes.html">Estudiantes</a>
+    <a href="personal.html">Personal</a>
+    <a href="cursos-secciones.html">Cursos y Secciones</a>
+    <a href="facultades-carreras.html">Facultades y Carreras</a>
+    <a href="periodos-inscripciones.html" class="activo">Períodos e Inscripciones</a>
+  </nav>
+
+  <main>
+    <h2 class="titulo-seccion">Períodos académicos</h2>
+
+    <div class="tarjeta">
+      <h3>Crear período académico</h3>
+      <form id="form-periodo">
+        <div class="form-grid">
+          <div><label>ID del período</label><input type="number" name="idPeriodo" required></div>
+          <div><label>Nombre</label><input type="text" name="nombre" placeholder="Segundo semestre 2026" required></div>
+          <div><label>Fecha inicio</label><input type="date" name="fechaInicio"></div>
+          <div><label>Fecha fin</label><input type="date" name="fechaFin"></div>
+          <div><label>Inicio de inscripción</label><input type="date" name="fechaInicioInscripcion"></div>
+          <div><label>Fin de inscripción</label><input type="date" name="fechaFinInscripcion"></div>
+          <div>
+            <label>Estado inicial</label>
+            <select name="estado"><option>INSCRIPCION</option><option>ACTIVO</option><option>CERRADO</option></select>
+          </div>
+        </div>
+        <button type="submit">Crear período</button>
+        <div class="mensaje" id="msg-periodo"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Abrir o cerrar inscripciones de un período</h3>
+      <form id="form-estado-periodo">
+        <div class="form-grid">
+          <div><label>ID del período</label><input type="number" name="idPeriodo" required></div>
+        </div>
+        <button type="submit">Abrir inscripciones</button>
+        <button type="button" class="secundario" onclick="cerrarPeriodo()">Cerrar inscripciones</button>
+        <div class="mensaje" id="msg-estado-periodo"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Períodos registrados</h3>
+      <button type="button" class="secundario" onclick="cargarPeriodos()">Actualizar lista</button>
+      <div id="tabla-periodos"></div>
+    </div>
+
+    <hr class="linea">
+    <h2 class="titulo-seccion">Inscripciones</h2>
+
+    <div class="tarjeta">
+      <h3>Procesar inscripción</h3>
+      <p><span class="pill">Tip</span> el estudiante y el período deben existir previamente.</p>
+      <form id="form-inscripcion">
+        <div class="form-grid">
+          <div><label>ID de inscripción</label><input type="number" name="id" required></div>
+          <div><label>Fecha de inscripción</label><input type="date" name="fechaDeInscripcion"></div>
+          <div>
+            <label>Estado</label>
+            <select name="estado"><option>Activa</option><option>Anulada</option></select>
+          </div>
+          <div><label>Total de créditos</label><input type="number" name="totalCreditos"></div>
+          <div><label>Carnet del estudiante</label><input type="number" name="carnetEstudiante" required></div>
+          <div><label>ID del período</label><input type="number" name="idPeriodo" required></div>
+        </div>
+        <button type="submit">Procesar inscripción</button>
+        <div class="mensaje" id="msg-inscripcion"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Agregar sección a una inscripción</h3>
+      <form id="form-detalle">
+        <div class="form-grid">
+          <div><label>ID de la inscripción</label><input type="number" name="idInscripcion" required></div>
+          <div><label>ID del detalle</label><input type="number" name="idDetalle" required></div>
+          <div><label>Fecha</label><input type="date" name="fechaInscripcion"></div>
+          <div>
+            <label>Estado</label>
+            <select name="estado"><option>Inscrita</option><option>Retirada</option></select>
+          </div>
+          <div><label>ID de la sección</label><input type="number" name="idSeccion" required></div>
+        </div>
+        <button type="submit" class="secundario">Agregar sección a la inscripción</button>
+        <div class="mensaje" id="msg-detalle"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Inscripciones registradas</h3>
+      <button type="button" class="secundario" onclick="cargarInscripciones()">Actualizar lista</button>
+      <div id="tabla-inscripciones"></div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    alEnviar("form-periodo", async (fd) => {
+      const body = {
+        idPeriodo: Number(fd.get("idPeriodo")), nombre: fd.get("nombre"),
+        fechaInicio: fd.get("fechaInicio"), fechaFin: fd.get("fechaFin"),
+        fechaInicioInscripcion: fd.get("fechaInicioInscripcion"), fechaFinInscripcion: fd.get("fechaFinInscripcion"),
+        estado: fd.get("estado")
+      };
+      const { ok, data } = await postJSON("/periodos", body);
+      mostrarMensaje("msg-periodo", data.mensaje, !ok);
+      document.getElementById("form-periodo").reset();
+      cargarPeriodos();
+    });
+
+    alEnviar("form-estado-periodo", async (fd) => {
+      const id = Number(fd.get("idPeriodo"));
+      const { ok, data } = await postJSON(`/periodos/${id}/abrir`, {});
+      mostrarMensaje("msg-estado-periodo", data.mensaje, !ok || data.mensaje.startsWith("Error"));
+      cargarPeriodos();
+    });
+
+    async function cerrarPeriodo() {
+      const id = Number(document.querySelector('#form-estado-periodo input[name="idPeriodo"]').value);
+      if (!id) { mostrarMensaje("msg-estado-periodo", "Ingresa el ID del período primero.", true); return; }
+      const { ok, data } = await postJSON(`/periodos/${id}/cerrar`, {});
+      mostrarMensaje("msg-estado-periodo", data.mensaje, !ok || data.mensaje.startsWith("Error"));
+      cargarPeriodos();
+    }
+
+    alEnviar("form-inscripcion", async (fd) => {
+      const body = {
+        id: Number(fd.get("id")), fechaDeInscripcion: fd.get("fechaDeInscripcion"), estado: fd.get("estado"),
+        totalCreditos: Number(fd.get("totalCreditos")) || 0,
+        carnetEstudiante: Number(fd.get("carnetEstudiante")), idPeriodo: Number(fd.get("idPeriodo"))
+      };
+      const { ok, data } = await postJSON("/inscripciones", body);
+      mostrarMensaje("msg-inscripcion", data.mensaje, !ok || data.mensaje.startsWith("Error"));
+      cargarInscripciones();
+    });
+
+    alEnviar("form-detalle", async (fd) => {
+      const idInscripcion = Number(fd.get("idInscripcion"));
+      const body = {
+        idDetalle: Number(fd.get("idDetalle")), fechaInscripcion: fd.get("fechaInscripcion"),
+        estado: fd.get("estado"), idSeccion: Number(fd.get("idSeccion"))
+      };
+      const { ok, data } = await postJSON(`/inscripciones/${idInscripcion}/detalles`, body);
+      mostrarMensaje("msg-detalle", data.mensaje, !ok || data.mensaje.startsWith("Error"));
+      cargarInscripciones();
+    });
+
+    async function cargarPeriodos() {
+      const lista = await getJSON("/periodos");
+      const filas = (lista || []).map(p => [v(p.idPeriodo), v(p.nombre), v(p.estado), v(p.fechaInicio), v(p.fechaFin)]);
+      document.getElementById("tabla-periodos").innerHTML =
+        construirTabla(["ID", "Nombre", "Estado", "Inicio", "Fin"], filas);
+    }
+
+    async function cargarInscripciones() {
+      const lista = await getJSON("/inscripciones");
+      const filas = (lista || []).map(i => [
+        v(i.id),
+        i.estudiante ? `${i.estudiante.nombre} ${i.estudiante.apellido} (${i.estudiante.carnet})` : "-",
+        i.periodoAcademico ? i.periodoAcademico.nombre : "-",
+        v(i.estado),
+        (i.detalles && i.detalles.length) ? i.detalles.length + " sección(es)" : "-"
+      ]);
+      document.getElementById("tabla-inscripciones").innerHTML =
+        construirTabla(["ID", "Estudiante", "Período", "Estado", "Detalles"], filas);
+    }
+
+    cargarPeriodos();
+    cargarInscripciones();
+  </script>
+</body>
+</html>

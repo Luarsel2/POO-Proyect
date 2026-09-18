@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facultades y Carreras - Portal Universitario UVG</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Portal de Gestión Universitaria</h1>
+      <span class="subtitulo">Prototipo POO · Universidad del Valle de Guatemala</span>
+    </div>
+  </header>
+
+  <nav class="menu">
+    <a href="index.html">Inicio</a>
+    <a href="estudiantes.html">Estudiantes</a>
+    <a href="personal.html">Personal</a>
+    <a href="cursos-secciones.html">Cursos y Secciones</a>
+    <a href="facultades-carreras.html" class="activo">Facultades y Carreras</a>
+    <a href="periodos-inscripciones.html">Períodos e Inscripciones</a>
+  </nav>
+
+  <main>
+    <h2 class="titulo-seccion">Facultades</h2>
+
+    <div class="tarjeta">
+      <h3>Crear facultad</h3>
+      <form id="form-facultad">
+        <div class="form-grid">
+          <div><label>Nombre de la facultad</label><input type="text" name="nombre" required></div>
+        </div>
+        <button type="submit">Crear facultad</button>
+        <div class="mensaje" id="msg-facultad"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Agregar departamento a una facultad</h3>
+      <form id="form-depto">
+        <div class="form-grid">
+          <div><label>Nombre de la facultad</label><input type="text" name="nombreFacultad" required></div>
+          <div><label>Nombre del departamento</label><input type="text" name="nombreDepartamento" required></div>
+        </div>
+        <button type="submit" class="secundario">Agregar departamento</button>
+        <div class="mensaje" id="msg-depto"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Asociar carrera existente a una facultad</h3>
+      <form id="form-asociar-carrera">
+        <div class="form-grid">
+          <div><label>Nombre de la facultad</label><input type="text" name="nombreFacultad" required></div>
+          <div><label>Nombre de la carrera</label><input type="text" name="nombreCarrera" required></div>
+        </div>
+        <button type="submit" class="secundario">Asociar carrera</button>
+        <div class="mensaje" id="msg-asociar-carrera"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Facultades registradas</h3>
+      <button type="button" class="secundario" onclick="cargarFacultades()">Actualizar lista</button>
+      <div id="tabla-facultades"></div>
+    </div>
+
+    <hr class="linea">
+    <h2 class="titulo-seccion">Carreras</h2>
+
+    <div class="tarjeta">
+      <h3>Crear carrera</h3>
+      <form id="form-carrera">
+        <div class="form-grid">
+          <div><label>Nombre de la carrera</label><input type="text" name="nombre" required></div>
+          <div><label>Total de créditos</label><input type="text" name="totalCreditos" placeholder="220"></div>
+          <div><label>Duración promedio (años)</label><input type="number" name="duracionPromedio"></div>
+        </div>
+        <button type="submit">Crear carrera</button>
+        <div class="mensaje" id="msg-carrera"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Agregar plan de estudio a una carrera</h3>
+      <form id="form-plan">
+        <div class="form-grid">
+          <div><label>Nombre de la carrera</label><input type="text" name="nombreCarrera" required></div>
+          <div><label>Año del plan</label><input type="number" name="year" placeholder="2026" required></div>
+          <div>
+            <label>Estado</label>
+            <select name="estado"><option>Vigente</option><option>Descontinuado</option></select>
+          </div>
+        </div>
+        <button type="submit" class="secundario">Agregar plan de estudio</button>
+        <div class="mensaje" id="msg-plan"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Agregar curso a un plan de estudio</h3>
+      <form id="form-curso-plan">
+        <div class="form-grid">
+          <div><label>Nombre de la carrera</label><input type="text" name="nombreCarrera" required></div>
+          <div><label>Año del plan</label><input type="number" name="year" required></div>
+          <div><label>Nombre del curso</label><input type="text" name="nombreCurso" required></div>
+        </div>
+        <button type="submit" class="secundario">Agregar curso al plan</button>
+        <div class="mensaje" id="msg-curso-plan"></div>
+      </form>
+      <p><span class="pill">Tip</span> el curso debe existir primero en la página "Cursos y Secciones".</p>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Carreras registradas</h3>
+      <button type="button" class="secundario" onclick="cargarCarreras()">Actualizar lista</button>
+      <div id="tabla-carreras"></div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    alEnviar("form-facultad", async (fd) => {
+      const { ok, data } = await postJSON("/facultades", { nombre: fd.get("nombre") });
+      mostrarMensaje("msg-facultad", data.mensaje, !ok);
+      document.getElementById("form-facultad").reset();
+      cargarFacultades();
+    });
+
+    alEnviar("form-depto", async (fd) => {
+      const nombreFacultad = encodeURIComponent(fd.get("nombreFacultad"));
+      const { ok, data } = await postJSON(`/facultades/${nombreFacultad}/departamentos`, {
+        nombreDepartamento: fd.get("nombreDepartamento")
+      });
+      mostrarMensaje("msg-depto", data.mensaje, !ok || data.mensaje.startsWith("Error"));
+      cargarFacultades();
+    });
+
+    alEnviar("form-asociar-carrera", async (fd) => {
+      const nombreFacultad = encodeURIComponent(fd.get("nombreFacultad"));
+      const nombreCarrera = encodeURIComponent(fd.get("nombreCarrera"));
+      const { ok, data } = await postJSON(`/facultades/${nombreFacultad}/carreras/${nombreCarrera}`, {});
+      mostrarMensaje("msg-asociar-carrera", data.mensaje, !ok || data.mensaje.startsWith("Error"));
+      cargarFacultades();
+    });
+
+    alEnviar("form-carrera", async (fd) => {
+      const body = {
+        nombre: fd.get("nombre"), totalCreditos: fd.get("totalCreditos"),
+        duracionPromedio: Number(fd.get("duracionPromedio")) || 0
+      };
+      const { ok, data } = await postJSON("/carreras", body);
+      mostrarMensaje("msg-carrera", data.mensaje, !ok);
+      document.getElementById("form-carrera").reset();
+      cargarCarreras();
+    });
+
+    alEnviar("form-plan", async (fd) => {
+      const nombreCarrera = encodeURIComponent(fd.get("nombreCarrera"));
+      const { ok, data } = await postJSON(`/carreras/${nombreCarrera}/planes`, {
+        year: Number(fd.get("year")), estado: fd.get("estado")
+      });
+      mostrarMensaje("msg-plan", data.mensaje, !ok || data.mensaje.startsWith("Error"));
+      cargarCarreras();
+    });
+
+    alEnviar("form-curso-plan", async (fd) => {
+      const nombreCarrera = encodeURIComponent(fd.get("nombreCarrera"));
+      const year = Number(fd.get("year"));
+      const nombreCurso = encodeURIComponent(fd.get("nombreCurso"));
+      const { ok, data } = await postJSON(`/carreras/${nombreCarrera}/planes/${year}/cursos/${nombreCurso}`, {});
+      mostrarMensaje("msg-curso-plan", data.mensaje, !ok || data.mensaje.startsWith("Error"));
+      cargarCarreras();
+    });
+
+    async function cargarFacultades() {
+      const lista = await getJSON("/facultades");
+      const filas = (lista || []).map(f => [
+        v(f.nombre),
+        (f.departamentos && f.departamentos.length) ? f.departamentos.map(d => d.nombre).join(", ") : "-",
+        (f.carreras && f.carreras.length) ? f.carreras.map(c => c.nombre).join(", ") : "-"
+      ]);
+      document.getElementById("tabla-facultades").innerHTML =
+        construirTabla(["Facultad", "Departamentos", "Carreras"], filas);
+    }
+
+    async function cargarCarreras() {
+      const lista = await getJSON("/carreras");
+      const filas = (lista || []).map(c => [
+        v(c.nombre), v(c.totalCreditos), v(c.duracionPromedio),
+        (c.planesDeEstudios && c.planesDeEstudios.length)
+          ? c.planesDeEstudios.map(p => `${p.year} (${p.cursos.length} curso(s))`).join(", ")
+          : "-"
+      ]);
+      document.getElementById("tabla-carreras").innerHTML =
+        construirTabla(["Carrera", "Créditos", "Duración", "Planes de estudio"], filas);
+    }
+
+    cargarFacultades();
+    cargarCarreras();
+  </script>
+</body>
+</html>

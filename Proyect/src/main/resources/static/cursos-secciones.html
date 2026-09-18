@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cursos y Secciones - Portal Universitario UVG</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Portal de Gestión Universitaria</h1>
+      <span class="subtitulo">Prototipo POO · Universidad del Valle de Guatemala</span>
+    </div>
+  </header>
+
+  <nav class="menu">
+    <a href="index.html">Inicio</a>
+    <a href="estudiantes.html">Estudiantes</a>
+    <a href="personal.html">Personal</a>
+    <a href="cursos-secciones.html" class="activo">Cursos y Secciones</a>
+    <a href="facultades-carreras.html">Facultades y Carreras</a>
+    <a href="periodos-inscripciones.html">Períodos e Inscripciones</a>
+  </nav>
+
+  <main>
+    <h2 class="titulo-seccion">Cursos</h2>
+
+    <div class="tarjeta">
+      <h3>Crear curso</h3>
+      <form id="form-curso">
+        <div class="form-grid">
+          <div><label>Nombre del curso</label><input type="text" name="nombre" required></div>
+          <div><label>Créditos</label><input type="number" name="creditos" required></div>
+        </div>
+        <button type="submit">Crear curso</button>
+        <div class="mensaje" id="msg-curso"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Cursos creados</h3>
+      <button type="button" class="secundario" onclick="cargarCursos()">Actualizar lista</button>
+      <div id="tabla-cursos"></div>
+    </div>
+
+    <hr class="linea">
+    <h2 class="titulo-seccion">Secciones</h2>
+
+    <div class="tarjeta">
+      <h3>Crear sección</h3>
+      <p><span class="pill">Tip</span> usa el código de empleado de un profesor ya registrado en la página de Personal.</p>
+      <form id="form-seccion">
+        <div class="form-grid">
+          <div><label>ID de sección</label><input type="number" name="idSeccion" required></div>
+          <div><label>Código de sección</label><input type="number" name="codigo" required></div>
+          <div><label>Cupo máximo</label><input type="number" name="cupoMaximo" required></div>
+          <div><label>Código del profesor</label><input type="number" name="codigoProfesor" required></div>
+        </div>
+        <button type="submit">Crear sección</button>
+        <div class="mensaje" id="msg-seccion"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Agregar horario a una sección</h3>
+      <form id="form-horario">
+        <div class="form-grid">
+          <div><label>ID de la sección</label><input type="number" name="idSeccion" required></div>
+          <div><label>ID del horario</label><input type="number" name="idHorario" required></div>
+          <div>
+            <label>Día</label>
+            <select name="diaSemana">
+              <option>Lunes</option><option>Martes</option><option>Miércoles</option>
+              <option>Jueves</option><option>Viernes</option><option>Sábado</option>
+            </select>
+          </div>
+          <div><label>Hora inicio</label><input type="time" name="horaInicio"></div>
+          <div><label>Hora fin</label><input type="time" name="horaFin"></div>
+        </div>
+        <button type="submit" class="secundario">Agregar horario</button>
+        <div class="mensaje" id="msg-horario"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Cupos de sección</h3>
+      <form id="form-cupo">
+        <div class="form-grid">
+          <div><label>ID de la sección</label><input type="number" name="idSeccion" required></div>
+        </div>
+        <button type="submit">Agregar estudiante (ocupar cupo)</button>
+        <button type="button" class="secundario" onclick="retirarCupo()">Retirar estudiante</button>
+        <div class="mensaje" id="msg-cupo"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Secciones creadas</h3>
+      <button type="button" class="secundario" onclick="cargarSecciones()">Actualizar lista</button>
+      <div id="tabla-secciones"></div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    alEnviar("form-curso", async (fd) => {
+      const body = { nombre: fd.get("nombre"), creditos: Number(fd.get("creditos")) };
+      const { ok, data } = await postJSON("/cursos", body);
+      mostrarMensaje("msg-curso", data.mensaje, !ok);
+      document.getElementById("form-curso").reset();
+      cargarCursos();
+    });
+
+    alEnviar("form-seccion", async (fd) => {
+      const body = {
+        idSeccion: Number(fd.get("idSeccion")), codigo: Number(fd.get("codigo")),
+        cupoMaximo: Number(fd.get("cupoMaximo")), codigoProfesor: Number(fd.get("codigoProfesor"))
+      };
+      const { ok, data } = await postJSON("/secciones", body);
+      mostrarMensaje("msg-seccion", data.mensaje, !ok || data.mensaje.includes("sin profesor"));
+      document.getElementById("form-seccion").reset();
+      cargarSecciones();
+    });
+
+    alEnviar("form-horario", async (fd) => {
+      const idSeccion = Number(fd.get("idSeccion"));
+      const body = {
+        idHorario: Number(fd.get("idHorario")), diaSemana: fd.get("diaSemana"),
+        horaInicio: fd.get("horaInicio"), horaFin: fd.get("horaFin")
+      };
+      const { ok, data } = await postJSON(`/secciones/${idSeccion}/horarios`, body);
+      mostrarMensaje("msg-horario", data.mensaje, !ok || data.mensaje.startsWith("Error"));
+      cargarSecciones();
+    });
+
+    alEnviar("form-cupo", async (fd) => {
+      const idSeccion = Number(fd.get("idSeccion"));
+      const { ok, data } = await postJSON(`/secciones/${idSeccion}/inscribir`, {});
+      mostrarMensaje("msg-cupo", data.mensaje, !ok || data.mensaje.startsWith("Error") || data.mensaje.includes("Sin cupos"));
+      cargarSecciones();
+    });
+
+    async function retirarCupo() {
+      const idSeccion = Number(document.querySelector('#form-cupo input[name="idSeccion"]').value);
+      if (!idSeccion) { mostrarMensaje("msg-cupo", "Ingresa el ID de la sección primero.", true); return; }
+      const { ok, data } = await postJSON(`/secciones/${idSeccion}/retirar`, {});
+      mostrarMensaje("msg-cupo", data.mensaje, !ok || data.mensaje.startsWith("Error"));
+      cargarSecciones();
+    }
+
+    async function cargarCursos() {
+      const lista = await getJSON("/cursos");
+      const filas = (lista || []).map(c => [v(c.nombre), v(c.creditos)]);
+      document.getElementById("tabla-cursos").innerHTML = construirTabla(["Nombre", "Créditos"], filas);
+    }
+
+    async function cargarSecciones() {
+      const lista = await getJSON("/secciones");
+      const filas = (lista || []).map(s => [
+        v(s.idSeccion), v(s.codigo),
+        s.profesor ? `${s.profesor.nombre} ${s.profesor.apellido}` : "-",
+        `${v(s.cupoActual)} / ${v(s.cupoMaximo)}`,
+        v(s.estado),
+        (s.horario && s.horario.length) ? s.horario.map(h => `${h.diaSemana} ${h.horaInicio}-${h.horaFin}`).join(", ") : "-"
+      ]);
+      document.getElementById("tabla-secciones").innerHTML =
+        construirTabla(["ID", "Código", "Profesor", "Cupo (actual/máx)", "Estado", "Horarios"], filas);
+    }
+
+    cargarCursos();
+    cargarSecciones();
+  </script>
+</body>
+</html>

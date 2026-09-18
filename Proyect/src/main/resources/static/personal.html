@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal - Portal Universitario UVG</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Portal de Gestiones</h1>
+      <span class="subtitulo">Prototipo v1</span>
+    </div>
+  </header>
+
+  <nav class="menu">
+    <a href="index.html">Inicio</a>
+    <a href="estudiantes.html">Estudiantes</a>
+    <a href="personal.html" class="activo">Personal</a>
+    <a href="cursos-secciones.html">Cursos y Secciones</a>
+    <a href="facultades-carreras.html">Facultades y Carreras</a>
+    <a href="periodos-inscripciones.html">Períodos e Inscripciones</a>
+  </nav>
+
+  <main>
+    <h2 class="titulo-seccion">Personal</h2>
+
+    <div class="tarjeta">
+      <h3>Registrar profesor</h3>
+      <form id="form-profesor">
+        <div class="form-grid">
+          <div><label>ID</label><input type="number" name="id" required></div>
+          <div><label>Nombre</label><input type="text" name="nombre" required></div>
+          <div><label>Apellido</label><input type="text" name="apellido" required></div>
+          <div><label>Fecha nacimiento</label><input type="date" name="fechaNacimiento"></div>
+          <div><label>Correo</label><input type="email" name="correo"></div>
+          <div><label>Teléfono</label><input type="number" name="telefono"></div>
+          <div><label>Dirección</label><input type="text" name="direccion"></div>
+          <div><label>Código de empleado</label><input type="number" name="codigoDeEmpleado" required></div>
+          <div><label>Fecha de contratación</label><input type="date" name="fechaDeContratacion"></div>
+          <div><label>Especialidad</label><input type="text" name="especialidad"></div>
+          <div><label>Materias</label><input type="text" name="materias" placeholder="POO, Estructuras..."></div>
+        </div>
+        <button type="submit">Registrar profesor</button>
+        <div class="mensaje" id="msg-profesor"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Profesores registrados</h3>
+      <button type="button" class="secundario" onclick="cargarProfesores()">Actualizar lista</button>
+      <div id="tabla-profesores"></div>
+    </div>
+
+    <hr class="linea">
+
+    <div class="tarjeta">
+      <h3>Registrar empleado administrativo</h3>
+      <form id="form-admin">
+        <div class="form-grid">
+          <div><label>ID</label><input type="number" name="id" required></div>
+          <div><label>Nombre</label><input type="text" name="nombre" required></div>
+          <div><label>Apellido</label><input type="text" name="apellido" required></div>
+          <div><label>Fecha nacimiento</label><input type="date" name="fechaNacimiento"></div>
+          <div><label>Correo</label><input type="email" name="correo"></div>
+          <div><label>Teléfono</label><input type="number" name="telefono"></div>
+          <div><label>Dirección</label><input type="text" name="direccion"></div>
+          <div><label>Código de empleado</label><input type="number" name="codigoDeEmpleado" required></div>
+          <div><label>Fecha de contratación</label><input type="date" name="fechaDeContratacion"></div>
+          <div><label>Puesto</label><input type="text" name="puesto"></div>
+          <div><label>Departamento</label><input type="text" name="departamento"></div>
+        </div>
+        <button type="submit">Registrar administrativo</button>
+        <div class="mensaje" id="msg-admin"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Personal administrativo registrado</h3>
+      <button type="button" class="secundario" onclick="cargarAdmin()">Actualizar lista</button>
+      <div id="tabla-admin"></div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    alEnviar("form-profesor", async (fd) => {
+      const body = {
+        id: Number(fd.get("id")), nombre: fd.get("nombre"), apellido: fd.get("apellido"),
+        fechaNacimiento: fd.get("fechaNacimiento"), correo: fd.get("correo"),
+        telefono: Number(fd.get("telefono")) || 0, direccion: fd.get("direccion"),
+        codigoDeEmpleado: Number(fd.get("codigoDeEmpleado")), fechaDeContratacion: fd.get("fechaDeContratacion"),
+        especialidad: fd.get("especialidad"), materias: fd.get("materias")
+      };
+      const { ok, data } = await postJSON("/profesores", body);
+      mostrarMensaje("msg-profesor", data.mensaje, !ok);
+      document.getElementById("form-profesor").reset();
+      cargarProfesores();
+    });
+
+    alEnviar("form-admin", async (fd) => {
+      const body = {
+        id: Number(fd.get("id")), nombre: fd.get("nombre"), apellido: fd.get("apellido"),
+        fechaNacimiento: fd.get("fechaNacimiento"), correo: fd.get("correo"),
+        telefono: Number(fd.get("telefono")) || 0, direccion: fd.get("direccion"),
+        codigoDeEmpleado: Number(fd.get("codigoDeEmpleado")), fechaDeContratacion: fd.get("fechaDeContratacion"),
+        puesto: fd.get("puesto"), departamento: fd.get("departamento")
+      };
+      const { ok, data } = await postJSON("/administracion", body);
+      mostrarMensaje("msg-admin", data.mensaje, !ok);
+      document.getElementById("form-admin").reset();
+      cargarAdmin();
+    });
+
+    async function cargarProfesores() {
+      const lista = await getJSON("/profesores");
+      const filas = (lista || []).map(p => [
+        v(p.codigoDeEmpleado), v(p.nombre), v(p.apellido), v(p.especialidad), v(p.materias)
+      ]);
+      document.getElementById("tabla-profesores").innerHTML =
+        construirTabla(["Código", "Nombre", "Apellido", "Especialidad", "Materias"], filas);
+    }
+
+    async function cargarAdmin() {
+      const lista = await getJSON("/administracion");
+      const filas = (lista || []).map(a => [
+        v(a.codigoDeEmpleado), v(a.nombre), v(a.apellido), v(a.puesto), v(a.departamento)
+      ]);
+      document.getElementById("tabla-admin").innerHTML =
+        construirTabla(["Código", "Nombre", "Apellido", "Puesto", "Departamento"], filas);
+    }
+
+    cargarProfesores();
+    cargarAdmin();
+  </script>
+</body>
+</html>

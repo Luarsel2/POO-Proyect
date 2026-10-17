@@ -20,7 +20,8 @@ public class CarreraController {
 
     private static final String ARCHIVO = "carreras.csv";
 
-    private final List listaCarreras = new ArrayList<>();
+    
+private final List<Carrera> listaCarreras = new ArrayList<>();
     private final CursoController cursoController;
 
     public CarreraController(CursoController cursoController) {
@@ -56,7 +57,7 @@ public class CarreraController {
     }
 
     private void guardar() {
-        List filas = new ArrayList<>();
+        List<String[]> filas = new ArrayList<>();
         for (Carrera c : listaCarreras) {
             String planesEncoded = c.getPlanesDeEstudios().stream()
                     .map(p -> {
@@ -122,9 +123,9 @@ public class CarreraController {
     }
 
     @GetMapping
-    public List obtenerTodas() {
-        return listaCarreras;
-    }
+    public List<Carrera> obtenerTodas() {
+    return listaCarreras;
+}
 
     public Carrera buscarPorNombre(String nombre) {
         return listaCarreras.stream()

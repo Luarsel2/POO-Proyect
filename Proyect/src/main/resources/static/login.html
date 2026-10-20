@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión - Portal Universitario</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body class="pagina-login">
+  <div class="login-layout">
+
+    <section class="login-marca">
+      <div class="marca-contenido">
+        <div class="marca-logo">U</div>
+        <h1>Portal<br>Universitario</h1>
+        <p>Asigna tus cursos de forma rápida, clara y sin sorpresas.</p>
+        <ul class="marca-lista">
+          <li>Cupos disponibles en tiempo real</li>
+          <li>Horarios sin choques</li>
+          <li>Todo tu proceso en un solo lugar</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="login-panel">
+      <div class="login-caja">
+        <h2>Bienvenido</h2>
+        <p class="login-sub">Ingresa con tu cuenta para continuar</p>
+
+        <form id="formLogin" autocomplete="off">
+          <div class="campo">
+            <label for="usuario">Usuario</label>
+            <input id="usuario" name="usuario" required autofocus
+                   placeholder="Carnet o usuario de administración">
+          </div>
+          <div class="campo">
+            <label for="clave">Contraseña</label>
+            <div class="campo-clave">
+              <input id="clave" name="clave" type="password" required
+                     placeholder="Estudiantes: tu correo institucional">
+              <button type="button" class="ver-clave" id="verClave">Mostrar</button>
+            </div>
+          </div>
+          <button type="submit" class="login-boton" id="btnEntrar">Entrar</button>
+          <div id="msgLogin" class="mensaje"></div>
+        </form>
+
+        <p class="login-pie">Si no puedes ingresar, acércate a Registro Académico.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    const inputClave = document.getElementById("clave");
+    document.getElementById("verClave").addEventListener("click", (e) => {
+      const oculta = inputClave.type === "password";
+      inputClave.type = oculta ? "text" : "password";
+      e.target.textContent = oculta ? "Ocultar" : "Mostrar";
+    });
+
+    alEnviar("formLogin", async (fd) => {
+      const btn = document.getElementById("btnEntrar");
+      btn.disabled = true;
+      btn.textContent = "Entrando...";
+      const { ok, data } = await postJSON("/auth/login", {
+        usuario: fd.get("usuario"),
+        clave: fd.get("clave")
+      });
+      if (ok) {
+        window.location.href = data.redirect;
+      } else {
+        mostrarMensaje("msgLogin", data.mensaje || "No se pudo iniciar sesión.", true);
+        btn.disabled = false;
+        btn.textContent = "Entrar";
+      }
+    });
+  </script>
+</body>
+</html>

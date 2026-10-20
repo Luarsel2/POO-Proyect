@@ -1,51 +1,78 @@
 package com.uvg.pooproyect.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class Profesor extends Empleado {
     private String especialidad;
     private String materias;
-    private Seccion seccion;
+    
+    private static final String ARCHIVO = "profesores.csv";
+    private List<Profesor> listaProfesores = new ArrayList<>();
 
-    public Profesor(int id, String nombre, String apellido, String fechaNacimiento, String correo,int telefono, String direccion, int codigoDeEmpleado, String fechaDeContratacion, String especialidad, String materias, Seccion seccion){
+    public Profesor(int id, String nombre, String apellido, String fechaNacimiento, String correo, int telefono, String direccion, int codigoDeEmpleado, String fechaDeContratacion, String especialidad, String materias) {
         super(id, nombre, apellido, fechaNacimiento, correo, telefono, direccion, codigoDeEmpleado, fechaDeContratacion);
-
         this.especialidad = especialidad;
         this.materias = materias;
-        this.seccion = seccion;
     }
 
-    public void asignarNota(){
+    public void asignarNota() {
         System.out.println("Asignando nota...");
     }
-    public void consultarCursos(){
+
+    public void consultarCursos() {
         System.out.println("Consultando cursos...");
     }
 
-    public String getEspecialidad(){
+    public Profesor buscarPorCodigo(int codigo) {
+        for (Profesor p : listaProfesores) {
+            if (p.getCodigoDeEmpleado() == codigo) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    private void guardar() {
+        //  persistencia en archivo profesores.csv
+    }
+
+    public void cargar() {
+        // lectura desde archivo profesores.csv
+    }
+
+    public Map<String, String> registrarProfesor() {
+        // registro del profesor y retornar mensaje/estado
+        return Map.of("mensaje", "Profesor registrado exitosamente");
+    }
+
+    public List<Profesor> obtenerTodos() {
+        return listaProfesores;
+    }
+
+    public String getEspecialidad() {
         return especialidad;
     }
-    public void setEspecialidad(String especialidad){
+
+    public void setEspecialidad(String especialidad) {
         this.especialidad = especialidad;
     }
 
-    public String getMaterias(){
+    public String getMaterias() {
         return materias;
     }
-    public void setMaterias(String materias){
+
+    public void setMaterias(String materias) {
         this.materias = materias;
     }
 
-    // @JsonIgnore: Seccion tambien apunta de vuelta a este Profesor
-    // (profesor.getSeccion().getProfesor()...) lo que provoca un bucle
-    // infinito al convertir a JSON. Se ignora este lado; la relacion sigue
-    // visible consultando /api/secciones.
-    @JsonIgnore
-    public Seccion getSeccion(){
-        return seccion;
-    }
-    public void setSeccion(Seccion seccion){
-        this.seccion = seccion;
+    public List<Profesor> getListaProfesores() {
+        return listaProfesores;
     }
 
+    public void setListaProfesores(List<Profesor> listaProfesores) {
+        this.listaProfesores = listaProfesores;
+    }
 }

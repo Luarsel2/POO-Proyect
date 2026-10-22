@@ -1,0 +1,491 @@
+/* ================================================================
+   estudiante.css  –  Portal Estudiantil
+   Paleta de colores alineada con el portal administrativo existente
+   Variables: --verde-oscuro #0b4d33 | --verde #14713f
+              --verde-claro #4caf7d  | --verde-fondo #eaf6ef
+              --blanco #ffffff       | --gris-borde #d7e6dd
+              --gris-texto #33403a
+   ================================================================ */
+
+/* ── Reset básico ──────────────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background-color: var(--verde-fondo);
+  color: var(--gris-texto);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── Layout general con Sidebar ─────────────────────────────────── */
+.portal-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+.sidebar {
+  width: 265px;
+  background: linear-gradient(180deg, var(--verde-oscuro) 0%, var(--verde) 100%);
+  color: var(--blanco);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+}
+
+.sidebar-header {
+  padding: 22px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-logo {
+  width: 42px;
+  height: 42px;
+  background: var(--blanco);
+  color: var(--verde-oscuro);
+  font-weight: 800;
+  font-size: 1.3rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-brand h2 {
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+.sidebar-brand span {
+  font-size: 0.72rem;
+  color: var(--verde-claro);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 14px 10px;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.sidebar-menu li { margin-bottom: 3px; }
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  color: rgba(255, 255, 255, 0.80);
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 0.90rem;
+  font-weight: 500;
+  transition: all 0.18s ease;
+}
+
+.sidebar-link:hover:not(.deshabilitado) {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--blanco);
+  transform: translateX(2px);
+}
+
+.sidebar-link.activo {
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--blanco);
+  font-weight: 700;
+  border-left: 3px solid var(--verde-claro);
+  padding-left: 10px;
+}
+
+.sidebar-link.deshabilitado {
+  color: rgba(255, 255, 255, 0.35);
+  cursor: not-allowed;
+}
+
+.badge-proximamente {
+  margin-left: auto;
+  font-size: 0.62rem;
+  background: rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.50);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.sidebar-footer {
+  padding: 14px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.btn-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+  background: #b3261e;
+  color: var(--blanco);
+  border-color: transparent;
+}
+
+/* ── Contenido principal ─────────────────────────────────────────── */
+.main-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar-estudiante {
+  background: var(--blanco);
+  border-bottom: 1px solid var(--gris-borde);
+  padding: 16px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.topbar-titulo h1 {
+  font-size: 1.28rem;
+  color: var(--verde-oscuro);
+  font-weight: 700;
+}
+
+.topbar-titulo p {
+  font-size: 0.82rem;
+  color: #5b6b60;
+}
+
+/* Chip del encabezado */
+.estudiante-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--verde-fondo);
+  padding: 7px 14px;
+  border-radius: 30px;
+  border: 1px solid var(--gris-borde);
+}
+
+.avatar-circulo {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--verde-oscuro);
+  color: var(--blanco);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.estudiante-info-chip .nombre-est {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--verde-oscuro);
+  display: block;
+}
+
+.estudiante-info-chip .carnet-est {
+  font-size: 0.76rem;
+  color: #5b6b60;
+}
+
+/* ── Área de contenido ───────────────────────────────────────────── */
+.contenido-portal {
+  padding: 28px 30px;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ── Tarjetas de métricas ────────────────────────────────────────── */
+.grid-metricas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.tarjeta-metrica {
+  background: var(--blanco);
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid var(--gris-borde);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+
+.tarjeta-metrica:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(11, 77, 51, 0.10);
+}
+
+.tarjeta-metrica .etiqueta {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #5b6b60;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.tarjeta-metrica .valor-principal {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--verde-oscuro);
+  line-height: 1.2;
+}
+
+.tarjeta-metrica .subtexto {
+  font-size: 0.80rem;
+  color: #7a897f;
+  margin-top: 5px;
+}
+
+/* ── Paneles de sección ──────────────────────────────────────────── */
+.panel-tarjeta {
+  background: var(--blanco);
+  border-radius: 10px;
+  border: 1px solid var(--gris-borde);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  margin-bottom: 26px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--gris-borde);
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+
+.panel-header h3 {
+  font-size: 1.08rem;
+  color: var(--verde-oscuro);
+  font-weight: 700;
+}
+
+.panel-subtitulo {
+  font-size: 0.84rem;
+  color: #5b6b60;
+  margin-top: 3px;
+}
+
+/* ── Tabla de cursos ─────────────────────────────────────────────── */
+.tabla-contenedor { overflow-x: auto; }
+
+table.tabla-estudiante {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.90rem;
+}
+
+table.tabla-estudiante th {
+  background: var(--verde-fondo);
+  color: var(--verde-oscuro);
+  font-weight: 700;
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 2px solid var(--gris-borde);
+  white-space: nowrap;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+table.tabla-estudiante td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--gris-borde);
+  color: var(--gris-texto);
+  vertical-align: middle;
+}
+
+table.tabla-estudiante tbody tr:hover { background-color: var(--verde-fondo); }
+
+/* ── Badges ──────────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.badge-activo {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-info {
+  background: var(--verde-fondo);
+  color: var(--verde-oscuro);
+  border: 1px solid var(--gris-borde);
+}
+
+/* ── Buscador ────────────────────────────────────────────────────── */
+.buscador-caja {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.input-busqueda {
+  flex-grow: 1;
+  min-width: 250px;
+  padding: 11px 16px;
+  border: 1px solid var(--gris-borde);
+  border-radius: 8px;
+  font-size: 0.94rem;
+  outline: none;
+  background: var(--blanco);
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.input-busqueda:focus {
+  border-color: var(--verde);
+  box-shadow: 0 0 0 3px rgba(20, 113, 63, 0.15);
+}
+
+/* ── Grid de cursos disponibles ──────────────────────────────────── */
+.grid-cursos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(345px, 1fr));
+  gap: 20px;
+}
+
+.tarjeta-curso {
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+
+.tarjeta-curso:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(11, 77, 51, 0.10);
+}
+
+.tarjeta-curso-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.curso-titulo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--verde-oscuro);
+}
+
+.curso-creditos {
+  background: var(--verde-fondo);
+  color: var(--verde);
+  border: 1px solid var(--gris-borde);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.curso-meta {
+  font-size: 0.81rem;
+  color: #5b6b60;
+  margin-bottom: 14px;
+}
+
+.secciones-titulo {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--verde);
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.seccion-item {
+  background: var(--verde-fondo);
+  border: 1px solid var(--gris-borde);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  font-size: 0.84rem;
+}
+
+.seccion-item:last-child { margin-bottom: 0; }
+
+.seccion-item-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  margin-bottom: 5px;
+  color: var(--verde-oscuro);
+}
+
+.cupo-pill {
+  font-size: 0.76rem;
+  padding: 2px 7px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.cupo-disponible { background: #d4edda; color: #155724; }
+.cupo-agotado { background: #f8d7da; color: #721c24; }
+
+.seccion-detalle {
+  color: #5b6b60;
+  font-size: 0.80rem;
+  line-height: 1.45;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .portal-layout { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: relative; }
+  .sidebar-menu { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sidebar-link { padding: 8px 10px; font-size: 0.83rem; }
+  .contenido-portal { padding: 20px 16px; }
+  .topbar-estudiante { padding: 14px 16px; }
+}

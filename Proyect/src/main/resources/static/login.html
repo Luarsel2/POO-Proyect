@@ -3,79 +3,213 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iniciar sesión - Portal Universitario</title>
+  <title>Acceso - Portal Universitario</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/login.css">
 </head>
 <body class="pagina-login">
   <div class="login-layout">
 
+    <!-- =================== PANEL IZQUIERDO (MARCA) =================== -->
     <section class="login-marca">
       <div class="marca-contenido">
         <div class="marca-logo">U</div>
         <h1>Portal<br>Universitario</h1>
-        <p>Asigna tus cursos de forma rápida, clara y sin sorpresas.</p>
+        <p>Sistema integral de gestión académica universitaria.</p>
+
         <ul class="marca-lista">
-          <li>Cupos disponibles en tiempo real</li>
-          <li>Horarios sin choques</li>
+          <li>Consulta de cursos, horarios y notas</li>
+          <li>Gestión académica completa</li>
           <li>Todo tu proceso en un solo lugar</li>
         </ul>
-      </div>
-    </section>
 
-    <section class="login-panel">
-      <div class="login-caja">
-        <h2>Bienvenido</h2>
-        <p class="login-sub">Ingresa con tu cuenta para continuar</p>
-
-        <form id="formLogin" autocomplete="off">
-          <div class="campo">
-            <label for="usuario">Usuario</label>
-            <input id="usuario" name="usuario" required autofocus
-                   placeholder="Carnet o usuario de administración">
-          </div>
-          <div class="campo">
-            <label for="clave">Contraseña</label>
-            <div class="campo-clave">
-              <input id="clave" name="clave" type="password" required
-                     placeholder="Estudiantes: tu correo institucional">
-              <button type="button" class="ver-clave" id="verClave">Mostrar</button>
+        <!-- Indicadores de los dos portales disponibles -->
+        <div class="portales-disponibles">
+          <div class="portal-badge">
+            <span class="portal-badge__icono">🎓</span>
+            <div>
+              <strong>Portal Estudiantil</strong>
+              <span>Consulta cursos, horarios y más</span>
             </div>
           </div>
-          <button type="submit" class="login-boton" id="btnEntrar">Entrar</button>
-          <div id="msgLogin" class="mensaje"></div>
-        </form>
-
-        <p class="login-pie">Si no puedes ingresar, acércate a Registro Académico.</p>
+          <div class="portal-badge">
+            <span class="portal-badge__icono">⚙️</span>
+            <div>
+              <strong>Portal Administrativo</strong>
+              <span>Gestión de registros y datos</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-  </div>
+    <!-- =================== PANEL DERECHO (FORMULARIOS) =================== -->
+    <section class="login-panel">
+      <div class="login-caja">
+
+        <!-- Selector de pestañas -->
+        <div class="tab-selector">
+          <button class="tab-btn tab-btn--activo" id="tab-estudiante" type="button"
+                  onclick="cambiarTab('estudiante')">
+            🎓&nbsp; Estudiante
+          </button>
+          <button class="tab-btn" id="tab-admin" type="button"
+                  onclick="cambiarTab('admin')">
+            ⚙️&nbsp; Administrador
+          </button>
+        </div>
+
+        <!-- ─── FORMULARIO ESTUDIANTIL ─── -->
+        <div id="panel-estudiante" class="tab-panel tab-panel--activo">
+          <div class="tab-panel__header">
+            <h2>Portal Estudiantil</h2>
+            <p class="login-sub">Ingresa con tu carnet universitario</p>
+          </div>
+
+          <form id="formLoginEstudiante" autocomplete="off">
+            <div class="campo">
+              <label for="carnetInput">Carnet universitario</label>
+              <div style="position:relative;">
+                <span class="campo-icono">🎓</span>
+                <input id="carnetInput" name="usuario" required autofocus
+                       class="campo-con-icono"
+                       placeholder="Ej. 26547"
+                       inputmode="numeric">
+              </div>
+            </div>
+
+            <div class="campo">
+              <label for="correoInput">Correo institucional (contraseña)</label>
+              <div class="campo-clave" style="position:relative;">
+                <span class="campo-icono">✉️</span>
+                <input id="correoInput" name="clave" type="password" required
+                       class="campo-con-icono"
+                       placeholder="carnet@uvg.edu.gt">
+                <button type="button" class="ver-clave" id="verClaveEst">Mostrar</button>
+              </div>
+            </div>
+
+            <button type="submit" class="login-boton login-boton--estudiante" id="btnEstudiante">
+              Ingresar al Portal Estudiantil
+            </button>
+            <div id="msgEstudiante" class="mensaje"></div>
+          </form>
+
+          <p class="login-pie">
+            Tu contraseña es tu correo institucional.<br>
+            Si no puedes ingresar, acércate a Registro Académico.
+          </p>
+        </div>
+
+        <!-- ─── FORMULARIO ADMINISTRATIVO ─── -->
+        <div id="panel-admin" class="tab-panel">
+          <div class="tab-panel__header">
+            <h2>Portal Administrativo</h2>
+            <p class="login-sub">Acceso para personal autorizado</p>
+          </div>
+
+          <form id="formLoginAdmin" autocomplete="off">
+            <div class="campo">
+              <label for="usuarioAdmin">Usuario administrativo</label>
+              <div style="position:relative;">
+                <span class="campo-icono">👤</span>
+                <input id="usuarioAdmin" name="usuario" required
+                       class="campo-con-icono"
+                       placeholder="Ej. admin">
+              </div>
+            </div>
+
+            <div class="campo">
+              <label for="claveAdmin">Contraseña</label>
+              <div class="campo-clave" style="position:relative;">
+                <span class="campo-icono">🔒</span>
+                <input id="claveAdmin" name="clave" type="password" required
+                       class="campo-con-icono"
+                       placeholder="••••••••">
+                <button type="button" class="ver-clave" id="verClaveAdmin">Mostrar</button>
+              </div>
+            </div>
+
+            <button type="submit" class="login-boton login-boton--admin" id="btnAdmin">
+              Ingresar al Portal Administrativo
+            </button>
+            <div id="msgAdmin" class="mensaje"></div>
+          </form>
+
+          <p class="login-pie">
+            Acceso restringido a personal autorizado.<br>
+            Si olvidaste tu contraseña, contacta a Sistemas.
+          </p>
+        </div>
+
+      </div><!-- /.login-caja -->
+    </section>
+
+  </div><!-- /.login-layout -->
 
   <script src="js/app.js"></script>
   <script>
-    const inputClave = document.getElementById("clave");
-    document.getElementById("verClave").addEventListener("click", (e) => {
-      const oculta = inputClave.type === "password";
-      inputClave.type = oculta ? "text" : "password";
-      e.target.textContent = oculta ? "Ocultar" : "Mostrar";
-    });
-
-    alEnviar("formLogin", async (fd) => {
-      const btn = document.getElementById("btnEntrar");
-      btn.disabled = true;
-      btn.textContent = "Entrando...";
-      const { ok, data } = await postJSON("/auth/login", {
-        usuario: fd.get("usuario"),
-        clave: fd.get("clave")
+    /* ── Cambio de pestaña ─────────────────────────────────────── */
+    function cambiarTab(tipo) {
+      ['estudiante', 'admin'].forEach(t => {
+        document.getElementById('tab-' + t).classList.toggle('tab-btn--activo', t === tipo);
+        document.getElementById('panel-' + t).classList.toggle('tab-panel--activo', t === tipo);
       });
+      // Limpiar mensajes al cambiar pestaña
+      ['msgEstudiante', 'msgAdmin'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = ''; el.style.display = 'none'; }
+      });
+    }
+
+    /* ── Mostrar / Ocultar contraseña ──────────────────────────── */
+    function configurarVerClave(btnId, inputId) {
+      const btn = document.getElementById(btnId);
+      const inp = document.getElementById(inputId);
+      if (!btn || !inp) return;
+      btn.addEventListener('click', () => {
+        const oculta = inp.type === 'password';
+        inp.type = oculta ? 'text' : 'password';
+        btn.textContent = oculta ? 'Ocultar' : 'Mostrar';
+      });
+    }
+    configurarVerClave('verClaveEst',   'correoInput');
+    configurarVerClave('verClaveAdmin', 'claveAdmin');
+
+    /* ── Lógica de login compartida ────────────────────────────── */
+    async function hacerLogin(formId, btnId, msgId, textoBoton) {
+      const form = document.getElementById(formId);
+      const btn  = document.getElementById(btnId);
+      const fd   = new FormData(form);
+
+      btn.disabled    = true;
+      btn.textContent = 'Entrando...';
+
+      const { ok, data } = await postJSON('/auth/login', {
+        usuario: fd.get('usuario'),
+        clave:   fd.get('clave')
+      });
+
       if (ok) {
         window.location.href = data.redirect;
       } else {
-        mostrarMensaje("msgLogin", data.mensaje || "No se pudo iniciar sesión.", true);
-        btn.disabled = false;
-        btn.textContent = "Entrar";
+        mostrarMensaje(msgId, data.mensaje || 'Usuario o contraseña incorrectos.', true);
+        btn.disabled    = false;
+        btn.textContent = textoBoton;
       }
+    }
+
+    /* ── Enlazar formularios ───────────────────────────────────── */
+    document.getElementById('formLoginEstudiante').addEventListener('submit', e => {
+      e.preventDefault();
+      hacerLogin('formLoginEstudiante', 'btnEstudiante', 'msgEstudiante',
+                 'Ingresar al Portal Estudiantil');
+    });
+
+    document.getElementById('formLoginAdmin').addEventListener('submit', e => {
+      e.preventDefault();
+      hacerLogin('formLoginAdmin', 'btnAdmin', 'msgAdmin',
+                 'Ingresar al Portal Administrativo');
     });
   </script>
 </body>

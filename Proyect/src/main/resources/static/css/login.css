@@ -1,15 +1,22 @@
+/* ================================================================
+   login.css  –  Página de inicio de sesión (Doble Portal)
+   Paleta verde unificada con el portal administrativo existente
+   ================================================================ */
+
+/* ── Cuerpo ─────────────────────────────────────────────────────── */
 body.pagina-login {
   min-height: 100vh;
   margin: 0;
   background: var(--blanco);
 }
-.login-awlayout {
+
+.login-layout {
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   min-height: 100vh;
 }
 
-
+/* ── Panel izquierdo ─────────────────────────────────────────────── */
 .login-marca {
   position: relative;
   display: flex;
@@ -52,89 +59,193 @@ body.pagina-login {
 }
 
 .login-marca h1 {
-  font-size: 2.6rem;
+  font-size: 2.5rem;
   line-height: 1.1;
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   letter-spacing: -0.5px;
 }
 
-.login-marca p {
-  font-size: 1.05rem;
+.login-marca > .marca-contenido > p {
+  font-size: 1.02rem;
   opacity: 0.9;
-  margin: 0 0 28px;
+  margin: 0 0 26px;
 }
 
-.marca-lista { list-style: none; margin: 0; padding: 0; }
+.marca-lista { list-style: none; margin: 0 0 34px; padding: 0; }
 
 .marca-lista li {
   padding: 8px 0 8px 30px;
   position: relative;
-  font-size: 0.95rem;
-  opacity: 0.95;
+  font-size: 0.93rem;
+  opacity: 0.92;
 }
 
 .marca-lista li::before {
   content: "✓";
   position: absolute;
   left: 0;
-  top: 7px;
-  width: 20px;
-  height: 20px;
+  top: 8px;
+  width: 19px;
+  height: 19px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 0.72rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* ── Badges de portales (panel izquierdo) ────────────────────────── */
+.portales-disponibles {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
+.portal-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.portal-badge__icono { font-size: 1.4rem; }
+
+.portal-badge strong {
+  display: block;
+  font-size: 0.90rem;
+  font-weight: 700;
+}
+
+.portal-badge span {
+  font-size: 0.76rem;
+  opacity: 0.78;
+}
+
+/* ── Panel derecho ───────────────────────────────────────────────── */
 .login-panel {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
+  padding: 40px 22px;
   background: var(--verde-fondo);
 }
 
+/* ── Caja de login con pestañas ──────────────────────────────────── */
 .login-caja {
   width: 100%;
   max-width: 390px;
   background: var(--blanco);
-  padding: 38px 34px 30px;
-  border-radius: 16px;
+  border-radius: 14px;
   border: 1px solid var(--gris-borde);
-  box-shadow: 0 10px 30px rgba(11, 77, 51, 0.10);
+  box-shadow: 0 8px 28px rgba(11, 77, 51, 0.10);
+  overflow: hidden;
 }
 
-.login-caja h2 {
-  margin: 0;
-  font-size: 1.6rem;
+/* ── Selector de pestañas ────────────────────────────────────────── */
+.tab-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--verde-fondo);
+  border-bottom: 2px solid var(--gris-borde);
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 15px 10px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  color: #5b6b60;
+  transition: all 0.18s ease;
+  margin-bottom: -2px;
+  font-family: inherit;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.55);
   color: var(--verde-oscuro);
 }
 
-.login-sub {
-  margin: 6px 0 26px;
-  color: #5b6b60;
-  font-size: 0.92rem;
+.tab-btn--activo {
+  background: var(--blanco);
+  color: var(--verde-oscuro);
+  border-bottom-color: var(--verde);
+  font-weight: 700;
 }
 
-.login-caja .campo { margin-bottom: 18px; }
+/* ── Paneles de contenido ────────────────────────────────────────── */
+.tab-panel {
+  display: none;
+  padding: 28px 32px 26px;
+}
 
-.login-caja input {
-  padding: 12px 14px;
+.tab-panel--activo { display: block; }
+
+.tab-panel__header { margin-bottom: 22px; }
+
+.tab-panel__header h2 {
+  margin: 0;
+  font-size: 1.38rem;
+  color: var(--verde-oscuro);
+  font-weight: 700;
+}
+
+.login-sub {
+  margin: 5px 0 0;
+  color: #5b6b60;
+  font-size: 0.86rem;
+}
+
+/* ── Campos ──────────────────────────────────────────────────────── */
+.campo { margin-bottom: 17px; }
+
+.campo label {
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--gris-texto);
+  margin-bottom: 5px;
+}
+
+.campo-icono {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
   font-size: 0.95rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.campo-con-icono {
+  width: 100%;
+  padding: 11px 13px 11px 36px !important;
+  font-size: 0.94rem;
+  border: 1px solid var(--gris-borde);
   border-radius: 8px;
   transition: border-color .15s, box-shadow .15s;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
-.login-caja input:focus {
+.campo-con-icono:focus {
   border-color: var(--verde);
   box-shadow: 0 0 0 3px rgba(20, 113, 63, 0.15);
 }
 
 .campo-clave { position: relative; }
-.campo-clave input { padding-right: 82px; }
+.campo-clave input { padding-right: 80px !important; }
 
 .ver-clave {
   position: absolute;
@@ -143,44 +254,100 @@ body.pagina-login {
   transform: translateY(-50%);
   background: transparent;
   color: var(--verde);
-  padding: 6px 10px;
-  font-size: 0.78rem;
+  padding: 5px 9px;
+  font-size: 0.75rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  font-family: inherit;
+  font-weight: 600;
 }
+
 .ver-clave:hover { background: var(--verde-fondo); }
 
+/* ── Botones de ingreso ──────────────────────────────────────────── */
 .login-boton {
   width: 100%;
-  padding: 13px;
-  font-size: 1rem;
+  padding: 12px;
+  font-size: 0.94rem;
+  font-weight: 700;
   border-radius: 8px;
-  margin-top: 4px;
+  margin-top: 5px;
+  border: none;
+  cursor: pointer;
   transition: transform .1s, box-shadow .15s, background .15s;
+  font-family: inherit;
+  letter-spacing: 0.2px;
 }
-.login-boton:hover { box-shadow: 0 6px 14px rgba(20, 113, 63, 0.3); }
+
 .login-boton:active { transform: translateY(1px); }
-.login-boton:disabled { opacity: .7; cursor: wait; }
+.login-boton:disabled { opacity: .65; cursor: wait; }
 
+/* Botón Estudiantil – tono verde más claro para diferenciarlo */
+.login-boton--estudiante {
+  background: linear-gradient(135deg, var(--verde), var(--verde-claro));
+  color: var(--blanco);
+  box-shadow: 0 4px 12px rgba(20, 113, 63, 0.30);
+}
+
+.login-boton--estudiante:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0e5e34, var(--verde));
+  box-shadow: 0 6px 16px rgba(20, 113, 63, 0.40);
+}
+
+/* Botón Administrativo – tono verde oscuro */
+.login-boton--admin {
+  background: linear-gradient(135deg, var(--verde-oscuro), var(--verde));
+  color: var(--blanco);
+  box-shadow: 0 4px 12px rgba(11, 77, 51, 0.30);
+}
+
+.login-boton--admin:hover:not(:disabled) {
+  box-shadow: 0 6px 16px rgba(11, 77, 51, 0.42);
+}
+
+/* ── Mensaje de error / éxito ────────────────────────────────────── */
+.mensaje {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  padding: 9px 12px;
+  border-radius: 7px;
+  display: none;
+}
+
+.mensaje.error {
+  background: #fdf0f0;
+  color: var(--rojo-error);
+  border: 1px solid #f5c6cb;
+}
+
+.mensaje.ok {
+  background: #edf7f1;
+  color: var(--verde-oscuro);
+  border: 1px solid var(--gris-borde);
+}
+
+/* ── Pie de la caja ─────────────────────────────────────────────── */
 .login-pie {
-  margin: 22px 0 0;
+  margin: 18px 0 0;
   text-align: center;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: #7a897f;
+  line-height: 1.55;
 }
 
-
-@media (max-width: 800px) {
-  .login-layout { grid-template-columns: 1fr; }
-  .login-marca { display: none; }
-  .login-panel { background: linear-gradient(145deg, var(--verde-oscuro), var(--verde)); }
-}
-
-
+/* ── Elementos usados por auth.js (páginas internas) ────────────── */
 .btn-salir {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.7);
   padding: 6px 14px;
   font-size: 0.82rem;
+  cursor: pointer;
+  border-radius: 6px;
+  color: var(--blanco);
+  font-family: inherit;
 }
+
 .btn-salir:hover { background: rgba(255, 255, 255, 0.15); }
 
 .usuario-barra {
@@ -188,4 +355,15 @@ body.pagina-login {
   align-items: center;
   gap: 12px;
   font-size: 0.85rem;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 820px) {
+  .login-layout { grid-template-columns: 1fr; }
+  .login-marca { display: none; }
+  .login-panel {
+    background: linear-gradient(145deg, var(--verde-oscuro), var(--verde));
+    padding: 28px 14px;
+  }
+  .tab-panel { padding: 24px 22px 22px; }
 }

@@ -71,7 +71,7 @@ public class EstudianteController {
 
     // Ejecutar lógica de negocio del modelo
     @PostMapping("/{carnet}/inscribir-curso")
-    public Map<String, String> inscribirCursoAEstudiante(@PathVariable int carnet) {
+    public Map<String, String> inscribirCursoAEstudiante(@PathVariable("carnet") int carnet) {
         Estudiante estudiante = buscarPorCarnetInterno(carnet);
 
         if (estudiante != null) {
@@ -84,7 +84,7 @@ public class EstudianteController {
 
     // Buscar estudiante por carnet
     @GetMapping("/{carnet}")
-    public Estudiante buscarPorCarnet(@PathVariable int carnet) {
+    public Estudiante buscarPorCarnet(@PathVariable("carnet") int carnet) {
         return buscarPorCarnetInterno(carnet);
     }
 

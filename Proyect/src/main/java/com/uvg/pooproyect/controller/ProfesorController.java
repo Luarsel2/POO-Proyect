@@ -24,7 +24,7 @@ public class ProfesorController {
             Profesor p = new Profesor(
                     CsvUtil.leerEntero(col[0], 0), col[1], col[2], col[3], col[4],
                     CsvUtil.leerEntero(col[5], 0), col[6], CsvUtil.leerEntero(col[7], 0),
-                    col[8], col[9], col[10], null
+                    col[8], col[9], col[10]
             );
             listaProfesores.add(p);
         }
@@ -49,7 +49,7 @@ public class ProfesorController {
         Profesor nuevo = new Profesor(
                 req.id(), req.nombre(), req.apellido(), req.fechaNacimiento(), req.correo(),
                 req.telefono(), req.direccion(), req.codigoDeEmpleado(), req.fechaDeContratacion(),
-                req.especialidad(), req.materias(), null
+                req.especialidad(), req.materias()
         );
         listaProfesores.add(nuevo);
         guardar();

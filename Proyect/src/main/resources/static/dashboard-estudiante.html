@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Estudiantil - Universidad</title>
+  <!-- style.css trae las variables CSS del sistema (--verde-oscuro, etc.) -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/estudiante.css">
+</head>
+<body>
+  <div class="portal-layout">
+
+    <!-- ═══════════════ MENÚ LATERAL ═══════════════ -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">U</div>
+        <div class="sidebar-brand">
+          <h2>Portal Estudiantil</h2>
+          <span>Universidad</span>
+        </div>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li>
+          <a href="dashboard-estudiante.html" class="sidebar-link activo">
+            🏠&nbsp; Inicio
+          </a>
+        </li>
+        <li>
+          <a href="cursos-estudiante.html" class="sidebar-link">
+            📚&nbsp; Consultar cursos
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+            📝&nbsp; Asignación de cursos
+            <span class="badge-proximamente">Próximamente</span>
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+            ↩️&nbsp; Retiro de cursos
+            <span class="badge-proximamente">Próximamente</span>
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+            📅&nbsp; Mi horario
+            <span class="badge-proximamente">Próximamente</span>
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+            📊&nbsp; Mis notas
+            <span class="badge-proximamente">Próximamente</span>
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+            📜&nbsp; Historial académico
+            <span class="badge-proximamente">Próximamente</span>
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+            👤&nbsp; Mi perfil
+            <span class="badge-proximamente">Próximamente</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <button id="btn-cerrar-sesion" class="btn-logout" type="button">
+          🚪&nbsp; Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- ═══════════════ CONTENIDO PRINCIPAL ═══════════════ -->
+    <div class="main-wrapper">
+      <!-- Topbar -->
+      <header class="topbar-estudiante">
+        <div class="topbar-titulo">
+          <h1>Panel Principal</h1>
+          <p>Bienvenido a tu portal académico universitario</p>
+        </div>
+        <div class="estudiante-chip">
+          <div class="avatar-circulo" id="avatar-iniciales">E</div>
+          <div class="estudiante-info-chip">
+            <span class="nombre-est" id="chip-nombre">Cargando...</span>
+            <span class="carnet-est" id="chip-carnet">Carnet: ---</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Área de contenido -->
+      <main class="contenido-portal">
+
+        <!-- Tarjetas de métricas -->
+        <div class="grid-metricas">
+          <div class="tarjeta-metrica">
+            <span class="etiqueta">Carrera</span>
+            <span class="valor-principal" id="txt-carrera" style="font-size:1.1rem;">Cargando...</span>
+            <span class="subtexto" id="txt-facultad">Facultad</span>
+          </div>
+          <div class="tarjeta-metrica">
+            <span class="etiqueta">Período académico</span>
+            <span class="valor-principal" id="txt-periodo" style="font-size:1.2rem;">Cargando...</span>
+            <span class="subtexto">Ciclo en curso</span>
+          </div>
+          <div class="tarjeta-metrica">
+            <span class="etiqueta">Cursos asignados</span>
+            <span class="valor-principal" id="txt-cantidad-cursos">0</span>
+            <span class="subtexto">Materias en curso</span>
+          </div>
+          <div class="tarjeta-metrica">
+            <span class="etiqueta">Total de créditos</span>
+            <span class="valor-principal" id="txt-total-creditos">0</span>
+            <span class="subtexto">Créditos inscritos</span>
+          </div>
+        </div>
+
+        <!-- Tabla de cursos actuales -->
+        <div class="panel-tarjeta">
+          <div class="panel-header">
+            <div>
+              <h3>Mis Cursos Actuales</h3>
+              <p class="panel-subtitulo">Asignaturas inscritas para el ciclo actual</p>
+            </div>
+          </div>
+          <div class="tabla-contenedor">
+            <table class="tabla-estudiante">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Curso</th>
+                  <th>Sección</th>
+                  <th>Profesor</th>
+                  <th>Días y Horarios</th>
+                  <th>Créditos</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-cursos-cuerpo">
+                <tr>
+                  <td colspan="7" style="text-align:center;color:#7a897f;padding:28px;">
+                    Cargando cursos asignados...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div><!-- /.main-wrapper -->
+
+  </div><!-- /.portal-layout -->
+
+  <script src="js/estudiante.js"></script>
+</body>
+</html>

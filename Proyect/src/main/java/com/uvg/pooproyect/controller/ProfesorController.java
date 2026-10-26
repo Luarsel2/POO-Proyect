@@ -63,7 +63,8 @@ public class ProfesorController {
     }
 
     // usado internamente por SeccionController para asignar profesor a una seccion
-    public Profesor buscarPorCodigo(int codigo) {
+    @GetMapping("/{codigo}")
+    public Profesor buscarPorCodigo(@PathVariable("codigo") int codigo) {
         for (Profesor p : listaProfesores) {
             if (p.getCodigoDeEmpleado() == codigo) {
                 return p;

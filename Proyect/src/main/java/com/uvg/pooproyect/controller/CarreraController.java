@@ -86,7 +86,7 @@ private final List<Carrera> listaCarreras = new ArrayList<>();
     }
 
     @PostMapping("/{nombreCarrera}/planes")
-    public Map agregarPlan(@PathVariable String nombreCarrera, @RequestBody PlanDeEstudioRequest req) {
+    public Map agregarPlan(@PathVariable("nombreCarrera") String nombreCarrera, @RequestBody PlanDeEstudioRequest req) {
         Carrera carrera = buscarPorNombre(nombreCarrera);
         if (carrera == null) {
             return Map.of("mensaje", "Error: carrera '" + nombreCarrera + "' no encontrada.");
@@ -97,7 +97,7 @@ private final List<Carrera> listaCarreras = new ArrayList<>();
     }
 
     @PostMapping("/{nombreCarrera}/planes/{year}/cursos/{nombreCurso}")
-    public Map agregarCursoAPlan(@PathVariable String nombreCarrera, @PathVariable int year, @PathVariable String nombreCurso) {
+    public Map agregarCursoAPlan(@PathVariable("nombreCarrera") String nombreCarrera, @PathVariable("year") int year, @PathVariable("nombreCurso") String nombreCurso) {
         Carrera carrera = buscarPorNombre(nombreCarrera);
         if (carrera == null) {
             return Map.of("mensaje", "Error: carrera '" + nombreCarrera + "' no encontrada.");

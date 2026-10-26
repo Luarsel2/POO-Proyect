@@ -52,7 +52,7 @@ public class PeriodoController {
     }
 
     @PostMapping("/{idPeriodo}/abrir")
-    public Map<String, String> abrirInscripciones(@PathVariable int idPeriodo) {
+    public Map<String, String> abrirInscripciones(@PathVariable("idPeriodo") int idPeriodo) {
         PeriodoAcademico periodo = buscarPorId(idPeriodo);
         if (periodo == null) {
             return Map.of("mensaje", "Error: periodo " + idPeriodo + " no encontrado.");
@@ -63,7 +63,7 @@ public class PeriodoController {
     }
 
     @PostMapping("/{idPeriodo}/cerrar")
-    public Map<String, String> cerrarInscripciones(@PathVariable int idPeriodo) {
+    public Map<String, String> cerrarInscripciones(@PathVariable("idPeriodo") int idPeriodo) {
         PeriodoAcademico periodo = buscarPorId(idPeriodo);
         if (periodo == null) {
             return Map.of("mensaje", "Error: periodo " + idPeriodo + " no encontrado.");

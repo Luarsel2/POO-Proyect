@@ -98,6 +98,8 @@ public class AuthController {
         resp.put("nombre", String.valueOf(sesion.getAttribute("nombre")));
         if (sesion.getAttribute("carnet") != null) {
             resp.put("carnet", sesion.getAttribute("carnet"));
+        } else if (ROL_ADMIN.equals(rol)) {
+            resp.put("carnet", 26547);
         }
         return ResponseEntity.ok(resp);
     }

@@ -76,7 +76,7 @@ public class FacultadController {
     }
 
     @PostMapping("/{nombreFacultad}/departamentos")
-    public Map<String, String> agregarDepartamento(@PathVariable String nombreFacultad, @RequestBody DepartamentoRequest req) {
+    public Map<String, String> agregarDepartamento(@PathVariable("nombreFacultad") String nombreFacultad, @RequestBody DepartamentoRequest req) {
         Facultad facultad = buscarPorNombre(nombreFacultad);
         if (facultad == null) {
             return Map.of("mensaje", "Error: facultad '" + nombreFacultad + "' no encontrada.");
@@ -87,7 +87,7 @@ public class FacultadController {
     }
 
     @PostMapping("/{nombreFacultad}/carreras/{nombreCarrera}")
-    public Map<String, String> asociarCarrera(@PathVariable String nombreFacultad, @PathVariable String nombreCarrera) {
+    public Map<String, String> asociarCarrera(@PathVariable("nombreFacultad") String nombreFacultad, @PathVariable("nombreCarrera") String nombreCarrera) {
         Facultad facultad = buscarPorNombre(nombreFacultad);
         Carrera carrera = carreraController.buscarPorNombre(nombreCarrera);
         if (facultad == null) {

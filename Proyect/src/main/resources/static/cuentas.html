@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cuentas - Portal Universitario</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Portal</h1>
+      <span class="subtitulo">v1</span>
+    </div>
+  </header>
+
+  <nav class="menu">
+    <a href="index.html">Inicio</a>
+    <a href="estudiantes.html">Estudiantes</a>
+    <a href="cuentas.html" class="activo">Cuentas</a>
+    <a href="personal.html">Personal</a>
+    <a href="cursos-secciones.html">Cursos y Secciones</a>
+    <a href="facultades-carreras.html">Facultades y Carreras</a>
+    <a href="periodos-inscripciones.html">Períodos e Inscripciones</a>
+  </nav>
+
+  <main>
+    <h2 class="titulo-seccion">Cuentas de estudiantes</h2>
+
+    <div class="tarjeta">
+      <h3>Crear cuenta</h3>
+      <p>El estudiante debe estar registrado. Usará su carnet como usuario y la contraseña inicial que escribas aquí.</p>
+      <form id="form-cuenta">
+        <div class="form-grid">
+          <div><label>Carnet</label><input type="number" name="carnet" min="0" required></div>
+          <div><label>Contraseña inicial (mínimo 6 caracteres)</label><input type="text" name="clave" minlength="6" required></div>
+        </div>
+        <button type="submit">Crear cuenta</button>
+        <div class="mensaje" id="msg-cuenta"></div>
+      </form>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Cuentas existentes</h3>
+      <div class="mensaje" id="msg-tabla"></div>
+      <div id="tabla-cuentas"></div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    alEnviar("form-cuenta", async (fd) => {
+      const body = { carnet: Number(fd.get("carnet")), clave: fd.get("clave") };
+      const { ok, data } = await postJSON("/cuentas", body);
+      mostrarMensaje("msg-cuenta", data.mensaje, !ok);
+      if (ok) document.getElementById("form-cuenta").reset();
+      cargarCuentas();
+    });
+
+    async function cargarCuentas() {
+      const cuentas = await getJSON("/cuentas");
+      const filas = (cuentas || []).map(c => [
+        v(c.carnet), v(c.nombre), v(c.apellido),
+        `<button type="button" class="secundario" data-accion="clave" data-carnet="${c.carnet}">Cambiar contraseña</button>` +
+        `<button type="button" class="peligro" data-accion="eliminar" data-carnet="${c.carnet}">Eliminar</button>`
+      ]);
+      document.getElementById("tabla-cuentas").innerHTML =
+        construirTabla(["Carnet", "Nombre", "Apellido", "Acciones"], filas);
+    }
+
+    // Un solo listener para todos los botones de la tabla.
+    document.getElementById("tabla-cuentas").addEventListener("click", async (e) => {
+      const boton = e.target.closest("button");
+      if (!boton) return;
+      const carnet = boton.dataset.carnet;
+
+      if (boton.dataset.accion === "clave") {
+        const clave = prompt("Nueva contraseña para el carnet " + carnet + " (mínimo 6 caracteres):");
+        if (clave === null) return;
+        const { ok, data } = await putJSON("/cuentas/" + carnet, { clave });
+        mostrarMensaje("msg-tabla", data.mensaje, !ok);
+      }
+
+      if (boton.dataset.accion === "eliminar") {
+        if (!confirm("¿Eliminar la cuenta del carnet " + carnet + "? El estudiante ya no podrá iniciar sesión.")) return;
+        const { ok, data } = await deleteJSON("/cuentas/" + carnet);
+        mostrarMensaje("msg-tabla", data.mensaje, !ok);
+        cargarCuentas();
+      }
+    });
+
+    cargarCuentas();
+  </script>
+</body>
+</html>

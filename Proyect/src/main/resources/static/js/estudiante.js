@@ -188,8 +188,8 @@ function renderizarCursos(cursos) {
                 <span class="cupo-pill ${claseCupo}">${textoCupo} (${sec.cupoActual}/${sec.cupoMaximo})</span>
               </div>
               <div class="seccion-detalle">
-                <div>👨‍🏫 <strong>Profesor:</strong> ${sec.profesor || "Sin profesor asignado"}</div>
-                <div>🕒 <strong>Horario:</strong> ${sec.horarios || "Horario por definir"}</div>
+                <div><strong>Profesor:</strong> ${sec.profesor || "Sin profesor asignado"}</div>
+                <div><strong>Horario:</strong> ${sec.horarios || "Horario por definir"}</div>
               </div>
             </div>
           `;
@@ -206,7 +206,7 @@ function renderizarCursos(cursos) {
           <span class="curso-creditos">${curso.creditos} Créditos</span>
         </div>
         <div class="curso-meta">
-          <span>📚 ${curso.carrera || 'Plan de estudios general'}</span>
+          <span>${curso.carrera || 'Plan de estudios general'}</span>
         </div>
         <div>
           <div class="secciones-titulo">Secciones y Horarios</div>

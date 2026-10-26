@@ -26,14 +26,12 @@
         <!-- Indicadores de los dos portales disponibles -->
         <div class="portales-disponibles">
           <div class="portal-badge">
-            <span class="portal-badge__icono">🎓</span>
             <div>
               <strong>Portal Estudiantil</strong>
               <span>Consulta cursos, horarios y más</span>
             </div>
           </div>
           <div class="portal-badge">
-            <span class="portal-badge__icono">⚙️</span>
             <div>
               <strong>Portal Administrativo</strong>
               <span>Gestión de registros y datos</span>
@@ -51,11 +49,11 @@
         <div class="tab-selector">
           <button class="tab-btn tab-btn--activo" id="tab-estudiante" type="button"
                   onclick="cambiarTab('estudiante')">
-            🎓&nbsp; Estudiante
+            Estudiante
           </button>
           <button class="tab-btn" id="tab-admin" type="button"
                   onclick="cambiarTab('admin')">
-            ⚙️&nbsp; Administrador
+            Administrador
           </button>
         </div>
 
@@ -70,7 +68,6 @@
             <div class="campo">
               <label for="carnetInput">Carnet universitario</label>
               <div style="position:relative;">
-                <span class="campo-icono">🎓</span>
                 <input id="carnetInput" name="usuario" required autofocus
                        class="campo-con-icono"
                        placeholder="Ej. 26547"
@@ -79,12 +76,11 @@
             </div>
 
             <div class="campo">
-              <label for="correoInput">Correo institucional (contraseña)</label>
+              <label for="correoInput">Contraseña</label>
               <div class="campo-clave" style="position:relative;">
-                <span class="campo-icono">✉️</span>
                 <input id="correoInput" name="clave" type="password" required
                        class="campo-con-icono"
-                       placeholder="carnet@uvg.edu.gt">
+                       placeholder="Tu contraseña">
                 <button type="button" class="ver-clave" id="verClaveEst">Mostrar</button>
               </div>
             </div>
@@ -96,7 +92,7 @@
           </form>
 
           <p class="login-pie">
-            Tu contraseña es tu correo institucional.<br>
+            Tu contraseña la asigna Registro Académico.<br>
             Si no puedes ingresar, acércate a Registro Académico.
           </p>
         </div>
@@ -112,7 +108,6 @@
             <div class="campo">
               <label for="usuarioAdmin">Usuario administrativo</label>
               <div style="position:relative;">
-                <span class="campo-icono">👤</span>
                 <input id="usuarioAdmin" name="usuario" required
                        class="campo-con-icono"
                        placeholder="Ej. admin">
@@ -122,7 +117,6 @@
             <div class="campo">
               <label for="claveAdmin">Contraseña</label>
               <div class="campo-clave" style="position:relative;">
-                <span class="campo-icono">🔒</span>
                 <input id="claveAdmin" name="clave" type="password" required
                        class="campo-con-icono"
                        placeholder="••••••••">

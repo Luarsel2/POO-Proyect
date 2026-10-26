@@ -152,6 +152,22 @@ button.secundario:hover {
   background: var(--verde-fondo);
 }
 
+button.peligro {
+  background: var(--blanco);
+  color: var(--rojo-error);
+  border: 1px solid var(--rojo-error);
+}
+
+button.peligro:hover {
+  background: #fdeceb;
+}
+
+td button {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  margin-right: 6px;
+}
+
 /* ----- Tablas ----- */
 table {
   width: 100%;

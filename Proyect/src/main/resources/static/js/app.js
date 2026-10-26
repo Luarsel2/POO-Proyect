@@ -4,13 +4,11 @@
 
 const API = "/api";
 
-// Hace un POST en JSON y devuelve la respuesta ya convertida a objeto.
-async function postJSON(url, body) {
-  const resp = await fetch(API + url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  });
+// Envía una petición con cuerpo JSON y devuelve la respuesta ya convertida a objeto.
+async function enviarJSON(metodo, url, body) {
+  const opciones = { method: metodo, headers: { "Content-Type": "application/json" } };
+  if (body !== undefined) opciones.body = JSON.stringify(body);
+  const resp = await fetch(API + url, opciones);
   let data;
   try {
     data = await resp.json();
@@ -19,6 +17,10 @@ async function postJSON(url, body) {
   }
   return { ok: resp.ok, data };
 }
+
+function postJSON(url, body) { return enviarJSON("POST", url, body); }
+function putJSON(url, body) { return enviarJSON("PUT", url, body); }
+function deleteJSON(url) { return enviarJSON("DELETE", url); }
 
 // Hace un GET y devuelve la lista/objeto ya convertido.
 async function getJSON(url) {

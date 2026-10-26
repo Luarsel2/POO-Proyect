@@ -37,6 +37,12 @@ public class CsvUtil {
     private static final Path CARPETA_DATOS = Paths.get("data");
 
     public static Path rutaArchivo(String nombreArchivo) {
+        if (Files.exists(Paths.get("data"))) {
+            return Paths.get("data").resolve(nombreArchivo);
+        }
+        if (Files.exists(Paths.get("../data"))) {
+            return Paths.get("../data").resolve(nombreArchivo);
+        }
         return CARPETA_DATOS.resolve(nombreArchivo);
     }
 
@@ -67,12 +73,15 @@ public class CsvUtil {
     // corresponde a qué registro.
     public static void escribirFilas(String nombreArchivo, List<String[]> filas) {
         try {
-            Files.createDirectories(CARPETA_DATOS);
+            Path destino = rutaArchivo(nombreArchivo);
+            if (destino.getParent() != null) {
+                Files.createDirectories(destino.getParent());
+            }
             List<String> lineas = new ArrayList<>();
             for (String[] fila : filas) {
                 lineas.add(String.join(",", fila));
             }
-            Files.write(rutaArchivo(nombreArchivo), lineas, StandardCharsets.UTF_8);
+            Files.write(destino, lineas, StandardCharsets.UTF_8);
         } catch (IOException e) {
             System.out.println("No se pudo guardar " + nombreArchivo + ": " + e.getMessage());
         }

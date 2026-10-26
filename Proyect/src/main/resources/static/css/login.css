@@ -81,18 +81,14 @@ body.pagina-login {
 }
 
 .marca-lista li::before {
-  content: "✓";
+  content: "";
   position: absolute;
-  left: 0;
-  top: 8px;
-  width: 19px;
-  height: 19px;
+  left: 4px;
+  top: 14px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
-  font-size: 0.72rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
 }
 
 /* ── Badges de portales (panel izquierdo) ────────────────────────── */

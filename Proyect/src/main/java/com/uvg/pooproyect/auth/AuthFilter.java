@@ -71,19 +71,15 @@ public class AuthFilter extends OncePerRequestFilter {
     }
 
     private boolean estudiantePuedeUsarApi(String metodo, String path, HttpSession sesion) {
-        if (!metodo.equals("GET")) return false;
-        // Consultas generales permitidas para el estudiante
-        if (path.equals("/api/cursos") || path.equals("/api/secciones") || path.equals("/api/periodos")
-                || path.equals("/api/carreras") || path.equals("/api/facultades")
-                || path.equals("/api/estudiantes/cursos-disponibles")) {
+        if (path.startsWith("/api/estudiantes/") || path.equals("/api/estudiantes")) {
             return true;
         }
-        Object carnet = sesion.getAttribute("carnet");
-        if (carnet == null) return false;
-
-        // Solo sus propios datos: /api/estudiantes/{carnet} o subrecursos de su propio carnet
-        String prefix = "/api/estudiantes/" + carnet;
-        return path.equals(prefix) || path.startsWith(prefix + "/");
+        if (path.equals("/api/cursos") || path.equals("/api/secciones") || path.equals("/api/periodos")
+                || path.equals("/api/carreras") || path.equals("/api/facultades")
+                || path.startsWith("/api/auth/")) {
+            return true;
+        }
+        return false;
     }
 
     private String destinoSegunRol(String rol) {

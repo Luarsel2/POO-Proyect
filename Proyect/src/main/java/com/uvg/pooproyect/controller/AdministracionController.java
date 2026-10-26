@@ -61,4 +61,14 @@ public class AdministracionController {
     public List<Administracion> obtenerTodos() {
         return listaAdministrativos;
     }
+
+    @GetMapping("/{codigo}")
+    public Administracion buscarPorCodigo(@PathVariable("codigo") int codigo) {
+        for (Administracion a : listaAdministrativos) {
+            if (a.getCodigoDeEmpleado() == codigo) {
+                return a;
+            }
+        }
+        return null;
+    }
 }

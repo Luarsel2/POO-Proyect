@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+// usuario de estudiante es: 26547 y contraseña es prueba26547@uvg.edu.gt
+// usuario de admin es: admin y contraseña admin123
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -22,13 +25,16 @@ public class AuthController {
     public record LoginRequest(String usuario, String clave) {}
 
     private final EstudianteController estudianteController;
+    private final CuentaController cuentaController;
     private final String adminUsuario;
     private final String adminClave;
 
     public AuthController(EstudianteController estudianteController,
+                          CuentaController cuentaController,
                           @Value("${portal.admin.usuario:admin}") String adminUsuario,
                           @Value("${portal.admin.clave:admin123}") String adminClave) {
         this.estudianteController = estudianteController;
+        this.cuentaController = cuentaController;
         this.adminUsuario = adminUsuario;
         this.adminClave = adminClave;
     }
@@ -49,11 +55,11 @@ public class AuthController {
                     "redirect", "index.html"));
         }
 
-        // 2) ¿Es un estudiante? usuario = carnet, clave = correo
+        // 2) ¿Es un estudiante con cuenta? usuario = carnet
         try {
             int carnet = Integer.parseInt(usuario);
             Estudiante e = estudianteController.buscarPorCarnet(carnet);
-            if (e != null && e.getCorreo() != null && e.getCorreo().trim().equalsIgnoreCase(clave)) {
+            if (e != null && cuentaController.verificar(carnet, clave)) {
                 HttpSession nueva = sesionNueva(request);
                 nueva.setAttribute("rol", ROL_ESTUDIANTE);
                 nueva.setAttribute("carnet", carnet);
@@ -90,6 +96,8 @@ public class AuthController {
         resp.put("nombre", String.valueOf(sesion.getAttribute("nombre")));
         if (sesion.getAttribute("carnet") != null) {
             resp.put("carnet", sesion.getAttribute("carnet"));
+        } else if (ROL_ADMIN.equals(rol)) {
+            resp.put("carnet", 26547);
         }
         return ResponseEntity.ok(resp);
     }

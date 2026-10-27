@@ -111,7 +111,7 @@ public class InscripcionController {
     }
 
     @PostMapping("/{idInscripcion}/detalles")
-    public Map<String, String> agregarDetalle(@PathVariable int idInscripcion, @RequestBody DetalleInscripcionRequest req) {
+    public Map<String, String> agregarDetalle(@PathVariable("idInscripcion") int idInscripcion, @RequestBody DetalleInscripcionRequest req) {
         Inscripcion inscripcion = buscarPorId(idInscripcion);
         if (inscripcion == null) {
             return Map.of("mensaje", "Error: inscripción " + idInscripcion + " no encontrada.");

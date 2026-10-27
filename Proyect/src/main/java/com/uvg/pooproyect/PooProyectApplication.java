@@ -7,6 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 // En lugar de ejecutar pruebas por System.out.println, ahora
 // levanta un servidor web que expone el portal (carpeta static)
 // y los endpoints REST (paquete controller).
+// usuario de estudiante es: 26547 y contraseña es prueba26547@uvg.edu.gt
+// usuario de admin es: admin y contraseña admin123
+
 @SpringBootApplication
 public class PooProyectApplication {
     public static void main(String[] args) {

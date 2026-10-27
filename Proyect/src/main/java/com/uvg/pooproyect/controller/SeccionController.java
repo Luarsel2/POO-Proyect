@@ -83,7 +83,7 @@ public class SeccionController {
     }
 
     @PostMapping("/{idSeccion}/horarios")
-    public Map<String, String> agregarHorario(@PathVariable int idSeccion, @RequestBody HorarioRequest req) {
+    public Map<String, String> agregarHorario(@PathVariable("idSeccion") int idSeccion, @RequestBody HorarioRequest req) {
         Seccion seccion = buscarPorId(idSeccion);
         if (seccion == null) {
             return Map.of("mensaje", "Error: sección " + idSeccion + " no encontrada.");
@@ -94,7 +94,7 @@ public class SeccionController {
     }
 
     @PostMapping("/{idSeccion}/inscribir")
-    public Map<String, String> agregarEstudiante(@PathVariable int idSeccion) {
+    public Map<String, String> agregarEstudiante(@PathVariable("idSeccion") int idSeccion) {
         Seccion seccion = buscarPorId(idSeccion);
         if (seccion == null) {
             return Map.of("mensaje", "Error: sección " + idSeccion + " no encontrada.");
@@ -108,7 +108,7 @@ public class SeccionController {
     }
 
     @PostMapping("/{idSeccion}/retirar")
-    public Map<String, String> retirarEstudiante(@PathVariable int idSeccion) {
+    public Map<String, String> retirarEstudiante(@PathVariable("idSeccion") int idSeccion) {
         Seccion seccion = buscarPorId(idSeccion);
         if (seccion == null) {
             return Map.of("mensaje", "Error: sección " + idSeccion + " no encontrada.");

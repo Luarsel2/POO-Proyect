@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Estudiantil - Universidad</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/estudiante.css">
+</head>
+<body>
+  <div class="portal-layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">U</div>
+        <div class="sidebar-brand">
+          <h2>Portal Estudiantil</h2>
+          <span>Universidad</span>
+        </div>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li>
+          <a href="#inicio" class="sidebar-link activo" id="link-nav-inicio">
+            Inicio
+          </a>
+        </li>
+        <li>
+          <a href="#asignacion" class="sidebar-link" id="link-nav-asignacion">
+            Asignación de cursos
+          </a>
+        </li>
+        <li>
+          <a href="#retiro" class="sidebar-link" id="link-nav-retiro">
+            Retiro de cursos
+          </a>
+        </li>
+        <li>
+          <a href="#horario" class="sidebar-link" id="link-nav-horario">
+            Mi horario
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+            Mis notas
+            <span class="badge-proximamente">Próximamente</span>
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+            Historial académico
+            <span class="badge-proximamente">Próximamente</span>
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+            Mi perfil
+            <span class="badge-proximamente">Próximamente</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <button id="btn-cerrar-sesion" class="btn-logout" type="button">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="topbar-estudiante">
+        <div class="topbar-titulo">
+          <h1 id="topbar-seccion-titulo">Panel Principal</h1>
+          <p id="topbar-seccion-sub">Bienvenido a tu portal académico universitario</p>
+        </div>
+        <div class="estudiante-chip">
+          <div class="avatar-circulo" id="avatar-iniciales">E</div>
+          <div class="estudiante-info-chip">
+            <span class="nombre-est" id="chip-nombre">Cargando...</span>
+            <span class="carnet-est" id="chip-carnet">Carnet: ---</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="contenido-portal">
+
+        <div id="vista-inicio" class="vista-panel activa">
+          <div class="grid-metricas">
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Carrera</span>
+              <span class="valor-principal" id="txt-carrera" style="font-size:1.1rem;">Cargando...</span>
+              <span class="subtexto" id="txt-facultad">Facultad de Ingeniería</span>
+            </div>
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Período académico</span>
+              <span class="valor-principal" id="txt-periodo" style="font-size:1.2rem;">Segundo Semestre 2026</span>
+              <span class="subtexto">Ciclo oficial activo</span>
+            </div>
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Cursos asignados</span>
+              <span class="valor-principal" id="txt-cantidad-cursos">0</span>
+              <span class="subtexto">Asignaturas inscritas</span>
+            </div>
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Total de créditos</span>
+              <span class="valor-principal" id="txt-total-creditos">0</span>
+              <span class="subtexto">Carga académica</span>
+            </div>
+          </div>
+
+          <div class="panel-tarjeta">
+            <div class="panel-header">
+              <div>
+                <h3>Mis Cursos Actuales</h3>
+                <p class="panel-subtitulo">Asignaturas inscritas para el ciclo en curso</p>
+              </div>
+              <div style="display:flex;gap:10px;">
+                <button type="button" class="btn-filtro activo" id="btn-ir-asignacion">Asignar cursos</button>
+                <button type="button" class="btn-filtro" id="btn-ir-horario">Ver mi horario</button>
+              </div>
+            </div>
+            <div class="tabla-contenedor">
+              <table class="tabla-estudiante">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Curso</th>
+                    <th>Sección</th>
+                    <th>Jornada</th>
+                    <th>Profesor</th>
+                    <th>Horario</th>
+                    <th>Créditos</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-cursos-cuerpo">
+                  <tr>
+                    <td colspan="8" style="text-align:center;color:#7a897f;padding:28px;">
+                      Cargando cursos asignados...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="vista-asignacion" class="vista-panel">
+          <div class="banner-info">
+            <div class="banner-info-texto">
+              <h4>Jornadas y Horarios Oficiales Establecidos</h4>
+              <p>
+                <strong>Jornada Matutina (Secciones 10):</strong> Clases de <strong>07:00 a 12:00</strong> con salida los viernes a la <strong>1:00 PM (13:00)</strong> por Laboratorio. Incluye el <strong>Receso Académico UVG de 10:15 a 10:40</strong>.<br>
+                <strong>Jornada Nocturna (Secciones 30):</strong> Clases vespertinas/nocturnas con entrada a las <strong>3:00 PM (15:00)</strong> y salida a las <strong>9:00 PM (21:00)</strong>.
+              </p>
+            </div>
+          </div>
+
+          <div class="seccion-opciones-horario">
+            <h3 style="font-size:1.15rem;color:var(--verde-oscuro);margin-bottom:6px;">Opciones de Horario Semanal</h3>
+            <p style="font-size:0.88rem;color:#5b6b60;margin-bottom:16px;">
+              Puedes asignarte el horario completo con un solo clic o personalizar materias individuales más abajo.
+            </p>
+
+            <div class="grid-opciones-horario">
+              <div class="tarjeta-opcion-horario matutina">
+                <div>
+                  <div class="tarjeta-opcion-badge">Opción 1 - Jornada Matutina</div>
+                  <h4>Horario Matutino Establecido</h4>
+                  <div class="opcion-horario-rango">07:00 a 12:00 (Viernes salida a la 1:00 PM)</div>
+                  <p class="opcion-horario-desc">
+                    Clases matutinas continuas de 7 a 12 con receso de 10:15 a 10:40 y salida los viernes a las 13:00 para Guatemala en el Contexto Global.
+                  </p>
+                  <ul class="opcion-cursos-lista">
+                    <li><span class="punto-color" style="background:#0284c7;"></span> Programación Orientada a Objetos (Lun, Mié 07:00 - 08:30)</li>
+                    <li><span class="punto-color" style="background:#059669;"></span> Assembler / Ensamblador (Mar, Jue 07:00 - 08:30)</li>
+                    <li><span class="punto-color" style="background:#7c3aed;"></span> Cálculo I (Lun, Mié 08:45 - 10:15)</li>
+                    <li><span class="punto-color" style="background:#ea580c;"></span> Estadística y Probabilidad (Mar, Jue 08:45 - 10:15)</li>
+                    <li><span class="punto-color" style="background:#db2777;"></span> Pensamiento Ciudadano / Ciudadanía (Lun, Mié 10:40 - 12:00)</li>
+                    <li><span class="punto-color" style="background:#0d9488;"></span> Guatemala en el Contexto Global (Mar, Jue 10:40 - 12:00 | Vie 10:40 - 13:00)</li>
+                  </ul>
+                </div>
+                <button type="button" class="btn-asignar-opcion matutina" id="btn-asignar-matutina">
+                  Asignar Horario Matutino Completo
+                </button>
+              </div>
+
+              <div class="tarjeta-opcion-horario nocturna">
+                <div>
+                  <div class="tarjeta-opcion-badge">Opción 2 - Jornada Nocturna</div>
+                  <h4>Horario Nocturno Establecido</h4>
+                  <div class="opcion-horario-rango">15:00 a 21:00 (Entrada 3:00 PM, Salida 9:00 PM)</div>
+                  <p class="opcion-horario-desc">
+                    Clases vespertinas y nocturnas con bloques distribuidos entre 15:00 y 21:00.
+                  </p>
+                  <ul class="opcion-cursos-lista">
+                    <li><span class="punto-color" style="background:#0284c7;"></span> Programación Orientada a Objetos (Lun, Mié 15:00 - 17:00)</li>
+                    <li><span class="punto-color" style="background:#059669;"></span> Assembler / Ensamblador (Mar, Jue 15:00 - 17:00)</li>
+                    <li><span class="punto-color" style="background:#7c3aed;"></span> Cálculo I (Lun, Mié 17:15 - 19:00)</li>
+                    <li><span class="punto-color" style="background:#ea580c;"></span> Estadística y Probabilidad (Mar, Jue 17:15 - 19:00)</li>
+                    <li><span class="punto-color" style="background:#db2777;"></span> Pensamiento Ciudadano / Ciudadanía (Lun, Mié 19:15 - 21:00)</li>
+                    <li><span class="punto-color" style="background:#0d9488;"></span> Guatemala en el Contexto Global (Mar, Jue 19:15 - 21:00 | Vie 18:00 - 21:00)</li>
+                  </ul>
+                </div>
+                <button type="button" class="btn-asignar-opcion nocturna" id="btn-asignar-nocturna">
+                  Asignar Horario Nocturno Completo
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:28px;margin-bottom:14px;">
+            <h4 style="color:var(--verde-oscuro);font-size:1.05rem;margin-bottom:4px;">Asignación Individual de Cursos</h4>
+            <p style="font-size:0.83rem;color:#5b6b60;">También puedes elegir o cambiar asignaturas y secciones de forma individual:</p>
+          </div>
+
+          <div class="buscador-caja">
+            <input type="text" id="input-buscar-asignacion" class="input-busqueda" placeholder="Buscar por nombre de curso, código o profesor...">
+          </div>
+
+          <div class="filtros-jornada">
+            <button type="button" class="btn-filtro activo" data-filtro="todos">Todos los cursos</button>
+            <button type="button" class="btn-filtro" data-filtro="Matutina">Jornada Matutina (07:00 - 12:00 / Vie 13:00)</button>
+            <button type="button" class="btn-filtro" data-filtro="Nocturna">Jornada Nocturna (15:00 - 21:00)</button>
+          </div>
+
+          <div id="grid-cursos-asignacion" class="grid-cursos">
+            <p style="text-align:center;color:#7a897f;padding:28px;">Cargando catálogo de asignación...</p>
+          </div>
+        </div>
+
+        <div id="vista-retiro" class="vista-panel">
+          <div class="banner-info" style="background:#fff7ed;border-color:#fed7aa;border-left-color:#ea580c;">
+            <div class="banner-info-texto">
+              <h4 style="color:#9a3412;">Retiro Oficial de Cursos</h4>
+              <p style="color:#7c2d12;">
+                Al retirar una asignatura se liberará inmediatamente tu cupo para otros estudiantes y se actualizará tu carga académica en tu horario y notas.
+              </p>
+            </div>
+          </div>
+
+          <div id="barra-accion-retiro" style="display:none;margin-bottom:16px;text-align:right;">
+            <button type="button" class="btn-retirar" id="btn-retirar-todo" style="background:#dc2626;color:white;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;">
+              Retirar Todas las Asignaturas del Horario
+            </button>
+          </div>
+
+          <div id="contenedor-retiro-vacio" style="display:none;text-align:center;padding:48px;background:white;border-radius:12px;border:1px solid var(--gris-borde);">
+            <h3 style="color:var(--verde-oscuro);margin-bottom:6px;">No tienes cursos asignados actualmente</h3>
+            <p style="color:#7a897f;margin-bottom:18px;">Puedes asignarte materias en la pestaña de Asignación de Cursos.</p>
+            <button type="button" class="btn-filtro activo" id="btn-volver-asignar">Ir a Asignación de Cursos</button>
+          </div>
+
+          <div id="grid-cursos-retiro" class="grid-retiro"></div>
+        </div>
+
+        <div id="vista-horario" class="vista-panel">
+          <div class="banner-info">
+            <div class="banner-info-texto">
+              <h4>Horario Académico Semanal</h4>
+              <p>
+                Visualización de tus asignaturas activas codificadas por colores. Las clases matutinas inician a las 07:00 y finalizan a las 12:00 (viernes a la 1:00 PM), con el receso institucional de 10:15 a 10:40. Las materias nocturnas operan entre las 15:00 y las 21:00.
+              </p>
+            </div>
+          </div>
+
+          <div class="horario-contenedor">
+            <table class="horario-tabla">
+              <thead>
+                <tr>
+                  <th class="col-hora">Horario</th>
+                  <th>Lunes</th>
+                  <th>Martes</th>
+                  <th>Miércoles</th>
+                  <th>Jueves</th>
+                  <th>Viernes</th>
+                </tr>
+              </thead>
+              <tbody id="cuerpo-tabla-horario">
+                <tr>
+                  <td colspan="6" style="text-align:center;padding:28px;color:#7a897f;">Cargando horario...</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="leyenda-grid" id="leyenda-horario"></div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+  </div>
+
+  <div id="modal-retiro" class="modal-backdrop" style="display:none;">
+    <div class="modal-box">
+      <h3>Confirmar Retiro de Asignatura</h3>
+      <p id="modal-retiro-texto">¿Estás seguro de que deseas desasignar esta materia? Se liberará tu cupo en la sección.</p>
+      <div class="modal-acciones">
+        <button type="button" class="btn-modal-cancelar" id="btn-cancelar-retiro">Cancelar</button>
+        <button type="button" class="btn-modal-confirmar" id="btn-confirmar-retiro">Confirmar Retiro</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-contenedor" class="toast-contenedor"></div>
+
+  <script src="js/estudiante.js"></script>
+</body>
+</html>

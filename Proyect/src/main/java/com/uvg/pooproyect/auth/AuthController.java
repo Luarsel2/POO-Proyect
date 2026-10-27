@@ -12,9 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-// usuario de estudiante es: 26547 y contraseña es prueba26547@uvg.edu.gt
-// usuario de admin es: admin y contraseña admin123
-
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

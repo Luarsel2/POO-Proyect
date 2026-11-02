@@ -41,15 +41,16 @@ public class AuthFilter extends OncePerRequestFilter {
 
         // El administrador tiene acceso a todo el panel administrativo y APIs
         if (AuthController.ROL_ADMIN.equals(rol)) {
-            chain.doFilter(req, resp);
+            chain.doFilter(req, resp);   // si el estudiante es admin, lo deja pasar
             return;
         }
 
         // El estudiante solo tiene acceso a sus vistas y a sus endpoints autorizados
         if (AuthController.ROL_ESTUDIANTE.equals(rol)) {
-            if (esApi) {
+            if (esApi) { // revisa que el estudiante este intentando obtener o guardar datos puros en la base de datos
                 if (estudiantePuedeUsarApi(req.getMethod(), path, sesion)) {
-                    chain.doFilter(req, resp);
+                    chain.doFilter(req, resp);// evalua si el estudiante tiene permiso para usar esa ruta de 
+                    // API en específico, revisando qué acción quiere hacer, a qué ruta y quién es es decir su sesión.
                 } else {
                     denegar(resp, true, 403, null);
                 }

@@ -299,6 +299,12 @@ public class EstudianteController {
             listaEstudiantes.add(fallback);
             return fallback;
         }
+        if (carnet == 26000) {
+            Estudiante fallback = new Estudiante(444, "Pedro", "Garcia", "2006-01-11", "pedro@gmail.com",
+                    33334444, "vista hermosa", 26000, 2026, "Activo", 78.0, null, null, 89890);
+            listaEstudiantes.add(fallback);
+            return fallback;
+        }
         Estudiante fallback = new Estudiante(carnet, "Estudiante", "UVG", "2000-01-01", "estudiante" + carnet + "@uvg.edu.gt",
                 0, "Guatemala", carnet, 2026, "Activo", 85.0, null, null, carnet);
         listaEstudiantes.add(fallback);

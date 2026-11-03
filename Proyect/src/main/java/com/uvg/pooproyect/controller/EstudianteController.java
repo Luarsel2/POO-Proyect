@@ -643,4 +643,172 @@ public class EstudianteController {
 
         return ResponseEntity.ok(resp);
     }
+
+    public record ActividadNota(String nombre, double ponderacion, double obtenido, String fecha, String retroalimentacion) {}
+
+    public static class NotaCurso {
+        public String codigoCurso;
+        public String nombreCurso;
+        public int creditos;
+        public String seccion;
+        public String profesor;
+        public String color;
+        public double zonaTotal;
+        public double zonaObtenida;
+        public double examenFinal;
+        public double notaTotal;
+        public String estado;
+        public List<ActividadNota> desglose;
+
+        public NotaCurso(String codigoCurso, String nombreCurso, int creditos, String seccion, String profesor,
+                         String color, double zonaTotal, double zonaObtenida, double examenFinal,
+                         double notaTotal, String estado, List<ActividadNota> desglose) {
+            this.codigoCurso = codigoCurso;
+            this.nombreCurso = nombreCurso;
+            this.creditos = creditos;
+            this.seccion = seccion;
+            this.profesor = profesor;
+            this.color = color;
+            this.zonaTotal = zonaTotal;
+            this.zonaObtenida = zonaObtenida;
+            this.examenFinal = examenFinal;
+            this.notaTotal = notaTotal;
+            this.estado = estado;
+            this.desglose = desglose;
+        }
+    }
+
+    private List<NotaCurso> generarMockNotas() {
+        List<NotaCurso> list = new ArrayList<>();
+
+        list.add(new NotaCurso("CC2008", "Programación Orientada a Objetos", 4, "Sec. 10 (Matutina)", "Ing. Carlos Mendoza", "#0284c7",
+                75.0, 68.5, 0.0, 68.5, "En curso",
+                List.of(
+                        new ActividadNota("Laboratorio 1: Modelado de Clases y Objetos", 5.0, 5.0, "18/07/2026", "Excelente abstracción y modularidad."),
+                        new ActividadNota("Corto 1: Encapsulamiento y Constructores", 5.0, 4.5, "25/07/2026", "Buen dominio conceptual."),
+                        new ActividadNota("Laboratorio 2: Polimorfismo e Interfaces", 10.0, 9.5, "08/08/2026", "Diseño limpio y testeado."),
+                        new ActividadNota("Examen Parcial 1: Fundamentos POO", 20.0, 18.0, "22/08/2026", "Muy buen análisis de diagramas UML."),
+                        new ActividadNota("Laboratorio 3: Manejo de Excepciones y Colecciones", 10.0, 9.0, "05/09/2026", "Validación robusta."),
+                        new ActividadNota("Proyecto Fase 1: Arquitectura de Software", 15.0, 14.0, "26/09/2026", "Gran trabajo de integración y arquitectura."),
+                        new ActividadNota("Examen Parcial 2: Patrones y Estructuras", 10.0, 8.5, "10/10/2026", "Correcta aplicación de patrones creacionales."),
+                        new ActividadNota("Examen Final", 25.0, 0.0, "Pendiente", "Por evaluar al cierre del ciclo.")
+                )
+        ));
+
+        list.add(new NotaCurso("CC2006", "Organización y Lenguaje Ensamblador (Assembler)", 4, "Sec. 10 (Matutina)", "Ing. Alejandro Morales", "#059669",
+                75.0, 71.0, 0.0, 71.0, "En curso",
+                List.of(
+                        new ActividadNota("Práctica 1: Arquitectura de Registros x86-64", 5.0, 5.0, "20/07/2026", "Registros de propósito general claros."),
+                        new ActividadNota("Laboratorio 1: Aritmética y Banderas de Estado", 10.0, 9.5, "03/08/2026", "Excelente optimización de instrucciones."),
+                        new ActividadNota("Examen Parcial 1: Modos de Direccionamiento", 20.0, 19.0, "24/08/2026", "Dominio preciso del stack frame."),
+                        new ActividadNota("Laboratorio 2: Manejo de la Pila y Subrutinas", 10.0, 10.0, "14/09/2026", "Pila balanceada y retorno sin fugas."),
+                        new ActividadNota("Proyecto Assembler: Decodificador Binario", 15.0, 14.5, "28/09/2026", "Gran eficiencia en ciclos de reloj."),
+                        new ActividadNota("Examen Parcial 2: Interrupciones y BIOS", 15.0, 13.0, "12/10/2026", "Conceptos claros de I/O a bajo nivel."),
+                        new ActividadNota("Examen Final", 25.0, 0.0, "Pendiente", "Por evaluar al cierre del ciclo.")
+                )
+        ));
+
+        list.add(new NotaCurso("MA1004", "Cálculo I", 4, "Sec. 10 (Matutina)", "Dr. Roberto Chang", "#7c3aed",
+                70.0, 62.0, 0.0, 62.0, "En curso",
+                List.of(
+                        new ActividadNota("Hoja de Trabajo 1: Límites y Continuidad", 5.0, 4.5, "22/07/2026", "Límites al infinito correctos."),
+                        new ActividadNota("Examen Corto 1: Regla de la Cadena", 5.0, 4.5, "05/08/2026", "Buen manejo algebraico."),
+                        new ActividadNota("Examen Parcial 1: Derivadas y Reglas de Diferenciación", 25.0, 22.0, "26/08/2026", "Excelente desarrollo en derivadas implícitas."),
+                        new ActividadNota("Hoja de Trabajo 2: Optimización y Tasas Relacionadas", 10.0, 9.0, "16/09/2026", "Planteamiento geométrico adecuado."),
+                        new ActividadNota("Examen Parcial 2: Integrales Definidas e Indefinidas", 25.0, 22.0, "14/10/2026", "Correcta sustitución trigonométrica."),
+                        new ActividadNota("Examen Final", 30.0, 0.0, "Pendiente", "Por evaluar al cierre del ciclo.")
+                )
+        ));
+
+        list.add(new NotaCurso("MA2005", "Estadística y Probabilidad", 3, "Sec. 10 (Matutina)", "Inga. Claudia Morales", "#ea580c",
+                70.0, 64.0, 0.0, 64.0, "En curso",
+                List.of(
+                        new ActividadNota("Taller 1: Análisis Exploratorio de Datos", 10.0, 10.0, "24/07/2026", "Gráficos de dispersión y boxplots impecables."),
+                        new ActividadNota("Examen Parcial 1: Probabilidad Clásica y Bayes", 20.0, 18.0, "28/08/2026", "Buen uso de árboles de probabilidad."),
+                        new ActividadNota("Taller 2: Modelado con R y Python", 10.0, 9.5, "18/09/2026", "Código documentado y reproducible."),
+                        new ActividadNota("Examen Parcial 2: Distribuciones Normal y Binomial", 20.0, 18.5, "16/10/2026", "Estandarización Z precisa."),
+                        new ActividadNota("Proyecto: Inferencia y Muestreo", 10.0, 8.0, "23/10/2026", "Conclusiones estadísticamente sustentadas."),
+                        new ActividadNota("Examen Final", 30.0, 0.0, "Pendiente", "Por evaluar al cierre del ciclo.")
+                )
+        ));
+
+        list.add(new NotaCurso("SH1002", "Pensamiento Ciudadano (Ciudadanía)", 3, "Sec. 10 (Matutina)", "Dr. Fernando Morales", "#db2777",
+                75.0, 70.0, 0.0, 70.0, "En curso",
+                List.of(
+                        new ActividadNota("Ensayo 1: Estado Constitucional y Democracia", 15.0, 14.5, "30/07/2026", "Argumentación crítica sólida."),
+                        new ActividadNota("Debate 1: Ética Pública y Transparencia", 15.0, 14.0, "27/08/2026", "Participación activa y fundamentada."),
+                        new ActividadNota("Examen Parcial 1: Marco Legal e Institucional", 20.0, 19.0, "24/09/2026", "Conocimiento profundo del texto constitucional."),
+                        new ActividadNota("Fase 1: Diagnóstico de Iniciativa Comunitaria", 25.0, 22.5, "15/10/2026", "Impacto social claramente definido."),
+                        new ActividadNota("Presentación Final del Proyecto", 25.0, 0.0, "Pendiente", "Por evaluar al cierre del ciclo.")
+                )
+        ));
+
+        list.add(new NotaCurso("SH1001", "Guatemala en el Contexto Global", 3, "Sec. 10 (Matutina)", "Inga. Sofía Castillo", "#0d9488",
+                70.0, 63.5, 0.0, 63.5, "En curso",
+                List.of(
+                        new ActividadNota("Lectura Crítica 1: Historia Económica de la Región", 10.0, 9.0, "28/07/2026", "Excelente síntesis de variables macroeconómicas."),
+                        new ActividadNota("Examen Parcial 1: Tratados Comerciales y Globalización", 20.0, 18.0, "01/09/2026", "Respuestas analíticas y bien redactadas."),
+                        new ActividadNota("Estudio de Caso: Competitividad e Innovación", 15.0, 14.0, "22/09/2026", "Buenas propuestas de valor para sectores productivos."),
+                        new ActividadNota("Examen Parcial 2: Retos Geopolíticos Contemporáneos", 25.0, 22.5, "20/10/2026", "Gran visión integral y geopolítica."),
+                        new ActividadNota("Ensayo Final Integrador", 30.0, 0.0, "Pendiente", "Por evaluar al cierre del ciclo.")
+                )
+        ));
+
+        return list;
+    }
+
+    @GetMapping({"/notas", "/{carnet}/notas"})
+    public ResponseEntity<Map<String, Object>> obtenerNotasEstudiante(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            HttpSession sesion) {
+        int carnetFinal = resolverCarnet(carnet, sesion);
+        Estudiante est = buscarPorCarnetInterno(carnetFinal);
+        if (est == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Integer> idsAsignados = asignacionesPorCarnet.getOrDefault(carnetFinal, Collections.emptyList());
+        List<NotaCurso> notas = new ArrayList<>();
+
+        List<String> codigosActivos = new ArrayList<>();
+        Map<String, SeccionCatalogo> mapaSeccion = new LinkedHashMap<>();
+        for (Integer idSec : idsAsignados) {
+            SeccionCatalogo sec = buscarSeccionCatalogo(idSec);
+            if (sec != null) {
+                codigosActivos.add(sec.codigoCurso);
+                mapaSeccion.put(sec.codigoCurso, sec);
+            }
+        }
+
+        List<NotaCurso> catalogoNotas = generarMockNotas();
+        for (NotaCurso nc : catalogoNotas) {
+            if (codigosActivos.isEmpty() || codigosActivos.contains(nc.codigoCurso)) {
+                if (mapaSeccion.containsKey(nc.codigoCurso)) {
+                    SeccionCatalogo s = mapaSeccion.get(nc.codigoCurso);
+                    nc.seccion = "Sec. " + s.codigoSeccion + " (" + s.jornada + ")";
+                    nc.profesor = s.profesor;
+                }
+                notas.add(nc);
+            }
+        }
+
+        double sumaPonderada = 0;
+        int totalCreditos = 0;
+        for (NotaCurso n : notas) {
+            sumaPonderada += (n.zonaObtenida / n.zonaTotal * 100.0) * n.creditos;
+            totalCreditos += n.creditos;
+        }
+        double promedioZona = totalCreditos > 0 ? Math.round((sumaPonderada / totalCreditos) * 10.0) / 10.0 : 0.0;
+
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("carnet", est.getCarnet());
+        resp.put("estudiante", est.getNombre() + " " + est.getApellido());
+        resp.put("periodo", "Segundo Semestre 2026");
+        resp.put("promedioZona", promedioZona);
+        resp.put("totalCreditos", totalCreditos);
+        resp.put("totalCursos", notas.size());
+        resp.put("cursos", notas);
+
+        return ResponseEntity.ok(resp);
+    }
 }

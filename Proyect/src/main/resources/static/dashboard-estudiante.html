@@ -41,9 +41,8 @@
           </a>
         </li>
         <li>
-          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+          <a href="#notas" class="sidebar-link" id="link-nav-notas">
             Mis notas
-            <span class="badge-proximamente">Próximamente</span>
           </a>
         </li>
         <li>
@@ -286,6 +285,54 @@
           </div>
         </div>
 
+        <div id="vista-notas" class="vista-panel">
+          <div class="banner-info">
+            <div class="banner-info-texto">
+              <h4>Calificaciones y Rendimiento Académico</h4>
+              <p>
+                Consulta el avance de tu zona acumulada, evaluaciones parciales y actividades entregadas para el ciclo en curso. El punteo de examen final se integrará al concluir el semestre oficial.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid-metricas">
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Promedio de zona</span>
+              <span class="valor-principal" id="txt-notas-promedio" style="color:var(--verde-oscuro);">0.0%</span>
+              <span class="subtexto">Rendimiento ponderado</span>
+            </div>
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Cursos en seguimiento</span>
+              <span class="valor-principal" id="txt-notas-cursos">0</span>
+              <span class="subtexto">Materias evaluadas</span>
+            </div>
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Créditos en curso</span>
+              <span class="valor-principal" id="txt-notas-creditos">0</span>
+              <span class="subtexto">Carga total actual</span>
+            </div>
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Estado de zona</span>
+              <span class="valor-principal" id="txt-notas-estado" style="font-size:1.1rem;color:#059669;">Satisfactorio</span>
+              <span class="subtexto">Derecho a examen final</span>
+            </div>
+          </div>
+
+          <div style="margin-top:24px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div>
+              <h3 style="color:var(--verde-oscuro);font-size:1.15rem;margin-bottom:4px;">Asignaturas en Curso</h3>
+              <p style="font-size:0.86rem;color:#5b6b60;">Haz clic en "Ver desglose de notas" en cualquier asignatura para revisar todas tus entregas y parciales.</p>
+            </div>
+            <div class="buscador-caja" style="margin-bottom:0;max-width:320px;">
+              <input type="text" id="input-buscar-notas" class="input-busqueda" placeholder="Filtrar por curso o código...">
+            </div>
+          </div>
+
+          <div id="grid-cursos-notas" class="grid-notas">
+            <p style="text-align:center;color:#7a897f;padding:28px;">Cargando calificaciones...</p>
+          </div>
+        </div>
+
       </main>
     </div>
 
@@ -298,6 +345,55 @@
       <div class="modal-acciones">
         <button type="button" class="btn-modal-cancelar" id="btn-cancelar-retiro">Cancelar</button>
         <button type="button" class="btn-modal-confirmar" id="btn-confirmar-retiro">Confirmar Retiro</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-detalle-notas" class="modal-backdrop" style="display:none;">
+    <div class="modal-box modal-box-amplio">
+      <div class="modal-header-curso">
+        <div>
+          <span class="badge-curso-modal" id="modal-nota-codigo">CC2008</span>
+          <h3 id="modal-nota-titulo" style="margin-top:6px;color:var(--verde-oscuro);">Detalle de Evaluaciones</h3>
+          <p id="modal-nota-sub" style="color:#5b6b60;font-size:0.88rem;margin-top:2px;">Docente: ---</p>
+        </div>
+        <button type="button" class="btn-cerrar-modal" id="btn-cerrar-modal-notas">&times;</button>
+      </div>
+
+      <div class="modal-resumen-fila">
+        <div class="resumen-item">
+          <span>Zona acumulada:</span>
+          <strong id="modal-nota-zona">0 / 0 pts</strong>
+        </div>
+        <div class="resumen-item">
+          <span>Examen final:</span>
+          <strong id="modal-nota-final">Pendiente</strong>
+        </div>
+        <div class="resumen-item">
+          <span>Punteo actual:</span>
+          <strong id="modal-nota-total" style="color:var(--verde-oscuro);">0 pts</strong>
+        </div>
+      </div>
+
+      <div class="tabla-contenedor" style="margin-top:16px;">
+        <table class="tabla-estudiante">
+          <thead>
+            <tr>
+              <th>Actividad / Evaluación</th>
+              <th>Fecha</th>
+              <th>Ponderación</th>
+              <th>Obtenido</th>
+              <th>Estado</th>
+              <th>Observación / Retroalimentación</th>
+            </tr>
+          </thead>
+          <tbody id="modal-nota-tabla-cuerpo">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-acciones" style="margin-top:20px;">
+        <button type="button" class="btn-modal-cancelar" id="btn-volver-notas">Cerrar</button>
       </div>
     </div>
   </div>

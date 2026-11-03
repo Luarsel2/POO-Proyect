@@ -37,6 +37,10 @@ public class CsvUtil {
     private static final Path CARPETA_DATOS = Paths.get("data");
 
     public static Path rutaArchivo(String nombreArchivo) {
+        String carpetaConfigurada = System.getProperty("portal.data-dir");
+        if (carpetaConfigurada != null && !carpetaConfigurada.isBlank()) {
+            return Paths.get(carpetaConfigurada).resolve(nombreArchivo);
+        }
         if (Files.exists(Paths.get("data"))) {
             return Paths.get("data").resolve(nombreArchivo);
         }

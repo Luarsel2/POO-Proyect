@@ -13,6 +13,12 @@ import java.io.IOException;
 @Component
 public class AuthFilter extends OncePerRequestFilter {
 
+    private final CuentaController cuentaController;
+
+    public AuthFilter(CuentaController cuentaController) {
+        this.cuentaController = cuentaController;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse resp, FilterChain chain)
             throws ServletException, IOException {
@@ -20,6 +26,14 @@ public class AuthFilter extends OncePerRequestFilter {
         String path = req.getRequestURI();
         HttpSession sesion = req.getSession(false);
         String rol = sesion == null ? null : (String) sesion.getAttribute("rol");
+
+        // Si el administrador eliminó la cuenta de este estudiante, se cierra su sesión.
+        if (AuthController.ROL_ESTUDIANTE.equals(rol)
+                && !cuentaController.existe((Integer) sesion.getAttribute("carnet"))) {
+            sesion.invalidate();
+            sesion = null;
+            rol = null;
+        }
 
         // "/" manda a cada quien a su pantalla
         if (path.equals("/")) {

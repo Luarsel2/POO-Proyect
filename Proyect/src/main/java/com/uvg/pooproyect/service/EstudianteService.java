@@ -3,8 +3,10 @@ package com.uvg.pooproyect.service;
 import com.uvg.pooproyect.dto.Requests.EstudianteRequest;
 import com.uvg.pooproyect.model.Estudiante;
 import com.uvg.pooproyect.repository.EstudianteRepository;
-import com.uvg.pooproyect.repository.EstudianteRepository.BloqueHorario;
-import com.uvg.pooproyect.repository.EstudianteRepository.SeccionCatalogo;
+import com.uvg.pooproyect.model.BloqueHorario;
+import com.uvg.pooproyect.model.SeccionCatalogo;
+import com.uvg.pooproyect.repository.AsignacionRepository;
+import com.uvg.pooproyect.repository.CatalogoSeccionRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,8 @@ import java.util.*;
 public class EstudianteService {
 
     private final EstudianteRepository estudianteRepository;
+    private final AsignacionRepository asignacionRepository;
+    private final CatalogoSeccionRepository catalogoRepository;
 
     public record ActividadNota(String nombre, double ponderacion, double obtenido, String fecha, String retroalimentacion) {}
 
@@ -52,7 +56,9 @@ public class EstudianteService {
     public record CursoHistorial(String codigo, String nombre, int creditos, double notaFinal, String estado, String periodo) {}
     public record SemestreHistorial(String periodo, double promedioSemestre, int creditosSemestre, List<CursoHistorial> cursos) {}
 
-    public EstudianteService(EstudianteRepository estudianteRepository) {
+    public EstudianteService(EstudianteRepository estudianteRepository, AsignacionRepository asignacionRepository, CatalogoSeccionRepository catalogoRepository) {
+        this.asignacionRepository = asignacionRepository;
+        this.catalogoRepository = catalogoRepository;
         this.estudianteRepository = estudianteRepository;
     }
 
@@ -106,12 +112,12 @@ public class EstudianteService {
             return null;
         }
 
-        List<Integer> idsAsignados = estudianteRepository.obtenerAsignacionesPorCarnet(carnetFinal);
+        List<Integer> idsAsignados = asignacionRepository.obtenerAsignacionesPorCarnet(carnetFinal);
         List<Map<String, Object>> cursosActuales = new ArrayList<>();
         int totalCreditos = 0;
 
         for (Integer idSec : idsAsignados) {
-            SeccionCatalogo sec = estudianteRepository.buscarSeccionCatalogo(idSec);
+            SeccionCatalogo sec = catalogoRepository.buscarSeccionCatalogo(idSec);
             if (sec != null) {
                 totalCreditos += sec.creditos;
                 Map<String, Object> map = new LinkedHashMap<>();
@@ -145,9 +151,9 @@ public class EstudianteService {
 
     public Map<String, Object> obtenerCursosDisponibles(Integer carnet, HttpSession sesion) {
         int carnetFinal = resolverCarnet(carnet, sesion);
-        List<Integer> idsAsignados = estudianteRepository.obtenerAsignacionesPorCarnet(carnetFinal);
+        List<Integer> idsAsignados = asignacionRepository.obtenerAsignacionesPorCarnet(carnetFinal);
         Map<String, List<SeccionCatalogo>> porCurso = new LinkedHashMap<>();
-        for (SeccionCatalogo sec : estudianteRepository.obtenerCatalogoSecciones()) {
+        for (SeccionCatalogo sec : catalogoRepository.obtenerCatalogoSecciones()) {
             porCurso.computeIfAbsent(sec.codigoCurso, k -> new ArrayList<>()).add(sec);
         }
 
@@ -167,7 +173,7 @@ public class EstudianteService {
                 sm.put("salon", s.salon);
                 sm.put("color", s.color);
                 sm.put("cupoMaximo", s.cupoMaximo);
-                sm.put("cupoActual", s.cupoActual);
+                sm.put("cupoActual", s.getCupoActual());
                 sm.put("asignada", idsAsignados.contains(s.idSeccion));
                 seccionesList.add(sm);
             }
@@ -210,33 +216,33 @@ public class EstudianteService {
             }
         }
 
-        SeccionCatalogo nueva = estudianteRepository.buscarSeccionCatalogo(idSeccion);
+        SeccionCatalogo nueva = catalogoRepository.buscarSeccionCatalogo(idSeccion);
         if (nueva == null) {
             return Map.of("ok", false, "mensaje", "Sección no encontrada.");
         }
 
-        List<Integer> asignados = estudianteRepository.obtenerAsignacionesPorCarnet(carnetFinal);
+        List<Integer> asignados = new ArrayList<>(asignacionRepository.obtenerAsignacionesPorCarnet(carnetFinal));
         if (asignados.contains(idSeccion)) {
             return Map.of("ok", false, "mensaje", "Ya estás inscrito en esta sección.");
         }
 
         for (Integer yaId : new ArrayList<>(asignados)) {
-            SeccionCatalogo yaSec = estudianteRepository.buscarSeccionCatalogo(yaId);
+            SeccionCatalogo yaSec = catalogoRepository.buscarSeccionCatalogo(yaId);
             if (yaSec != null && yaSec.codigoCurso.equalsIgnoreCase(nueva.codigoCurso)) {
                 asignados.remove(yaId);
-                if (yaSec.cupoActual > 0) {
-                    yaSec.cupoActual--;
+                if (yaSec.getCupoActual() > 0) {
+                    yaSec.liberarCupo();
                 }
             }
         }
 
-        if (nueva.cupoActual >= nueva.cupoMaximo) {
+        if (nueva.getCupoActual() >= nueva.cupoMaximo) {
             return Map.of("ok", false, "mensaje", "No hay cupos disponibles en esta sección.");
         }
 
         asignados.add(idSeccion);
-        nueva.cupoActual++;
-        estudianteRepository.guardarAsignaciones(carnetFinal, asignados);
+        nueva.reservarCupo();
+        asignacionRepository.guardarAsignaciones(carnetFinal, asignados);
         est.inscribirCurso();
 
         Map<String, Object> res = new LinkedHashMap<>();
@@ -259,24 +265,24 @@ public class EstudianteService {
                 ? List.of(201, 202, 203, 204, 205, 206)
                 : List.of(101, 102, 103, 104, 105, 106);
 
-        List<Integer> asignados = estudianteRepository.obtenerAsignacionesPorCarnet(carnetFinal);
+        List<Integer> asignados = new ArrayList<>(asignacionRepository.obtenerAsignacionesPorCarnet(carnetFinal));
         for (Integer yaId : new ArrayList<>(asignados)) {
-            SeccionCatalogo sec = estudianteRepository.buscarSeccionCatalogo(yaId);
-            if (sec != null && sec.cupoActual > 0) {
-                sec.cupoActual--;
+            SeccionCatalogo sec = catalogoRepository.buscarSeccionCatalogo(yaId);
+            if (sec != null && sec.getCupoActual() > 0) {
+                sec.liberarCupo();
             }
         }
         asignados.clear();
 
         for (Integer nuevoId : idsDeseados) {
-            SeccionCatalogo sec = estudianteRepository.buscarSeccionCatalogo(nuevoId);
+            SeccionCatalogo sec = catalogoRepository.buscarSeccionCatalogo(nuevoId);
             if (sec != null) {
                 asignados.add(nuevoId);
-                sec.cupoActual++;
+                sec.reservarCupo();
             }
         }
 
-        estudianteRepository.guardarAsignaciones(carnetFinal, asignados);
+        asignacionRepository.guardarAsignaciones(carnetFinal, asignados);
 
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("ok", true);
@@ -292,17 +298,17 @@ public class EstudianteService {
             return Map.of("ok", false, "mensaje", "Estudiante no encontrado.");
         }
 
-        List<Integer> asignados = estudianteRepository.obtenerAsignacionesPorCarnet(carnetFinal);
+        List<Integer> asignados = new ArrayList<>(asignacionRepository.obtenerAsignacionesPorCarnet(carnetFinal));
         if (asignados != null) {
             for (Integer idSec : asignados) {
-                SeccionCatalogo sec = estudianteRepository.buscarSeccionCatalogo(idSec);
-                if (sec != null && sec.cupoActual > 0) {
-                    sec.cupoActual--;
+                SeccionCatalogo sec = catalogoRepository.buscarSeccionCatalogo(idSec);
+                if (sec != null && sec.getCupoActual() > 0) {
+                    sec.liberarCupo();
                 }
             }
             asignados.clear();
         }
-        estudianteRepository.guardarAsignaciones(carnetFinal, asignados);
+        asignacionRepository.guardarAsignaciones(carnetFinal, asignados);
 
         return Map.of("ok", true, "mensaje", "Se han retirado todas las asignaturas correctamente.");
     }
@@ -329,17 +335,17 @@ public class EstudianteService {
             }
         }
 
-        List<Integer> asignados = estudianteRepository.obtenerAsignacionesPorCarnet(carnetFinal);
+        List<Integer> asignados = new ArrayList<>(asignacionRepository.obtenerAsignacionesPorCarnet(carnetFinal));
         if (asignados == null || !asignados.contains(idSeccion)) {
             return Map.of("ok", false, "mensaje", "El estudiante no tiene asignada esa sección.");
         }
 
         asignados.remove(Integer.valueOf(idSeccion));
-        SeccionCatalogo sec = estudianteRepository.buscarSeccionCatalogo(idSeccion);
-        if (sec != null && sec.cupoActual > 0) {
-            sec.cupoActual--;
+        SeccionCatalogo sec = catalogoRepository.buscarSeccionCatalogo(idSeccion);
+        if (sec != null && sec.getCupoActual() > 0) {
+            sec.liberarCupo();
         }
-        estudianteRepository.guardarAsignaciones(carnetFinal, asignados);
+        asignacionRepository.guardarAsignaciones(carnetFinal, asignados);
         est.retirarCurso();
 
         Map<String, Object> res = new LinkedHashMap<>();
@@ -350,11 +356,11 @@ public class EstudianteService {
 
     public Map<String, Object> obtenerHorario(Integer carnet, HttpSession sesion) {
         int carnetFinal = resolverCarnet(carnet, sesion);
-        List<Integer> idsAsignados = estudianteRepository.obtenerAsignacionesPorCarnet(carnetFinal);
+        List<Integer> idsAsignados = asignacionRepository.obtenerAsignacionesPorCarnet(carnetFinal);
         List<Map<String, Object>> bloquesResp = new ArrayList<>();
 
         for (Integer idSec : idsAsignados) {
-            SeccionCatalogo sec = estudianteRepository.buscarSeccionCatalogo(idSec);
+            SeccionCatalogo sec = catalogoRepository.buscarSeccionCatalogo(idSec);
             if (sec != null && sec.bloques != null) {
                 for (BloqueHorario b : sec.bloques) {
                     Map<String, Object> bm = new LinkedHashMap<>();
@@ -395,13 +401,13 @@ public class EstudianteService {
             return null;
         }
 
-        List<Integer> idsAsignados = estudianteRepository.obtenerAsignacionesPorCarnet(carnetFinal);
+        List<Integer> idsAsignados = asignacionRepository.obtenerAsignacionesPorCarnet(carnetFinal);
         List<NotaCurso> notas = new ArrayList<>();
 
         List<String> codigosActivos = new ArrayList<>();
         Map<String, SeccionCatalogo> mapaSeccion = new LinkedHashMap<>();
         for (Integer idSec : idsAsignados) {
-            SeccionCatalogo sec = estudianteRepository.buscarSeccionCatalogo(idSec);
+            SeccionCatalogo sec = catalogoRepository.buscarSeccionCatalogo(idSec);
             if (sec != null) {
                 codigosActivos.add(sec.codigoCurso);
                 mapaSeccion.put(sec.codigoCurso, sec);

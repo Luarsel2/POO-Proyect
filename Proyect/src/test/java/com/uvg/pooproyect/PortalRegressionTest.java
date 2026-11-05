@@ -8,6 +8,8 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import com.uvg.pooproyect.repository.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -75,6 +77,19 @@ class PortalRegressionTest {
         for (String ruta : new String[]{"cursos", "facultades", "profesores", "administracion", "periodos", "cuentas", "estudiantes"}) {
             mvc.perform(get("/api/" + ruta).session(s)).andExpect(status().isOk());
         }
+        // Simula un reinicio: reconstruye las relaciones a partir de los CSV escritos por la API.
+        var cursos = new CsvCursoRepository(); cursos.cargar();
+        var carreras = new CsvCarreraRepository(cursos); carreras.cargar();
+        var facultades = new CsvFacultadRepository(carreras); facultades.cargar();
+        assertEquals("POO Test", facultades.buscarPorNombre("Ingenieria Test").getCarreras()
+            .getFirst().getPlanesDeEstudios().getFirst().getCursos().getFirst().getNombre());
+        var profesores = new CsvProfesorRepository(); profesores.cargar();
+        var secciones = new CsvSeccionRepository(profesores); secciones.cargar();
+        assertEquals("08:00", secciones.buscarPorId(900).getHorario().getFirst().getHoraInicio());
+        var periodos = new CsvPeriodoRepository(); periodos.cargar();
+        var estudiantes = new CsvEstudianteRepository(); estudiantes.cargar();
+        var inscripciones = new CsvInscripcionRepository(estudiantes, periodos, secciones); inscripciones.cargar();
+        assertEquals(900, inscripciones.buscarPorId(900).getDetalles().getFirst().getSeccion().getIdSeccion());
     }
 
     private void enviar(MockHttpSession s, String ruta, String cuerpo) throws Exception {

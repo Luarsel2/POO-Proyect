@@ -1331,3 +1331,266 @@ table.tabla-estudiante tbody tr:hover { background-color: var(--verde-fondo); }
 .resumen-item strong {
   color: var(--verde-oscuro);
 }
+
+.contenedor-historial-semestres {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tarjeta-semestre-historial {
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tarjeta-semestre-historial:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+}
+
+.semestre-header {
+  background: #f8fafc;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gris-borde);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.semestre-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge-semestre-periodo {
+  background: var(--verde-oscuro);
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.semestre-header h4 {
+  color: #334155;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.semestre-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.stat-semestre-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+}
+
+.stat-sem-label {
+  color: #64748b;
+}
+
+.badge-curso-codigo-sm {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.badge-estado-aprobado {
+  background: #ecfdf5;
+  color: #047857;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.layout-perfil {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.columna-perfil-lateral {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+.columna-perfil-principal {
+  flex: 1;
+  min-width: 0;
+}
+
+.tarjeta-perfil-avatar {
+  background: var(--blanco);
+  border: 1px solid var(--gris-borde);
+  border-radius: 12px;
+  padding: 28px 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.avatar-perfil-grande {
+  width: 96px;
+  height: 96px;
+  background: linear-gradient(135deg, var(--verde-oscuro) 0%, var(--verde) 100%);
+  color: #ffffff;
+  font-size: 2.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: 0 auto 16px auto;
+  box-shadow: 0 6px 16px rgba(11, 77, 51, 0.25);
+}
+
+.badge-perfil-carnet {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.badge-perfil-estado {
+  display: inline-block;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.perfil-stats-mini {
+  margin-top: 20px;
+  border-top: 1px solid var(--gris-borde);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.stat-mini {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-mini-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-mini-valor {
+  font-size: 0.90rem;
+  color: var(--verde-oscuro);
+  font-weight: 700;
+}
+
+.grid-campos-perfil {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  padding: 16px 0 6px 0;
+}
+
+.campo-dato {
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.campo-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.campo-valor {
+  font-size: 0.92rem;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.grid-form-perfil {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.input-form {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--gris-borde);
+  border-radius: 8px;
+  font-size: 0.90rem;
+  font-family: inherit;
+  color: var(--gris-texto);
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input-form:focus {
+  outline: none;
+  border-color: var(--verde);
+  box-shadow: 0 0 0 3px rgba(20, 113, 63, 0.12);
+}
+
+.input-form:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.btn-guardar-perfil {
+  background: var(--verde-oscuro);
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.90rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.btn-guardar-perfil:hover {
+  background: var(--verde);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 900px) {
+  .layout-perfil {
+    flex-direction: column;
+  }
+  .columna-perfil-lateral {
+    width: 100%;
+  }
+}

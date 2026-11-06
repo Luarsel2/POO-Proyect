@@ -811,4 +811,136 @@ public class EstudianteController {
 
         return ResponseEntity.ok(resp);
     }
+
+    public record CursoHistorial(String codigo, String nombre, int creditos, double notaFinal, String estado, String periodo) {}
+    public record SemestreHistorial(String periodo, double promedioSemestre, int creditosSemestre, List<CursoHistorial> cursos) {}
+
+    @GetMapping({"/historial", "/{carnet}/historial"})
+    public ResponseEntity<Map<String, Object>> obtenerHistorialEstudiante(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            HttpSession sesion) {
+        int carnetFinal = resolverCarnet(carnet, sesion);
+        Estudiante est = buscarPorCarnetInterno(carnetFinal);
+        if (est == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<SemestreHistorial> semestres = new ArrayList<>();
+
+        List<CursoHistorial> s1Cursos = List.of(
+                new CursoHistorial("CC1001", "Introducción a la Programación", 4, 88.0, "Aprobado", "Primer Semestre 2025"),
+                new CursoHistorial("MA1001", "Precálculo y Álgebra Lineal", 4, 84.0, "Aprobado", "Primer Semestre 2025"),
+                new CursoHistorial("FS1001", "Física I (Mecánica Clásica)", 4, 82.0, "Aprobado", "Primer Semestre 2025"),
+                new CursoHistorial("CO1001", "Comunicación y Redacción Técnica", 3, 90.0, "Aprobado", "Primer Semestre 2025"),
+                new CursoHistorial("QU1001", "Química General para Computación", 3, 85.0, "Aprobado", "Primer Semestre 2025")
+        );
+        semestres.add(new SemestreHistorial("Primer Semestre 2025", 85.8, 18, s1Cursos));
+
+        List<CursoHistorial> s2Cursos = List.of(
+                new CursoHistorial("CC1002", "Algoritmos y Estructuras de Datos I", 4, 91.0, "Aprobado", "Segundo Semestre 2025"),
+                new CursoHistorial("MA1002", "Cálculo Diferencial", 4, 86.0, "Aprobado", "Segundo Semestre 2025"),
+                new CursoHistorial("FS1002", "Física II (Electricidad y Magnetismo)", 4, 83.0, "Aprobado", "Segundo Semestre 2025"),
+                new CursoHistorial("CC1003", "Lógica Computacional y Discretas", 3, 89.0, "Aprobado", "Segundo Semestre 2025"),
+                new CursoHistorial("ME1001", "Metodología de la Investigación", 3, 87.0, "Aprobado", "Segundo Semestre 2025")
+        );
+        semestres.add(new SemestreHistorial("Segundo Semestre 2025", 87.3, 18, s2Cursos));
+
+        List<CursoHistorial> s3Cursos = List.of(
+                new CursoHistorial("CC2001", "Algoritmos y Estructuras de Datos II", 4, 92.0, "Aprobado", "Primer Semestre 2026"),
+                new CursoHistorial("MA1003", "Cálculo Integral", 4, 85.0, "Aprobado", "Primer Semestre 2026"),
+                new CursoHistorial("CC2002", "Arquitectura y Organización de Computadores I", 4, 88.0, "Aprobado", "Primer Semestre 2026"),
+                new CursoHistorial("CC2004", "Sistemas Operativos (Fundamentos)", 4, 86.0, "Aprobado", "Primer Semestre 2026"),
+                new CursoHistorial("ET1001", "Ética en la Era de la Información", 3, 93.0, "Aprobado", "Primer Semestre 2026")
+        );
+        semestres.add(new SemestreHistorial("Primer Semestre 2026", 88.7, 19, s3Cursos));
+
+        int creditosTotales = 0;
+        int cursosAprobados = 0;
+        double sumaNotasPonderadas = 0;
+        for (SemestreHistorial s : semestres) {
+            for (CursoHistorial c : s.cursos()) {
+                if ("Aprobado".equalsIgnoreCase(c.estado())) {
+                    creditosTotales += c.creditos();
+                    cursosAprobados++;
+                    sumaNotasPonderadas += (c.notaFinal() * c.creditos());
+                }
+            }
+        }
+        double promedioAcumulado = creditosTotales > 0 ? Math.round((sumaNotasPonderadas / creditosTotales) * 10.0) / 10.0 : 0.0;
+
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("carnet", est.getCarnet());
+        resp.put("estudiante", est.getNombre() + " " + est.getApellido());
+        resp.put("carrera", "Ingeniería en Ciencias de la Computación");
+        resp.put("facultad", "Facultad de Ingeniería");
+        resp.put("promedioAcumulado", promedioAcumulado);
+        resp.put("creditosAprobados", creditosTotales);
+        resp.put("cursosAprobados", cursosAprobados);
+        resp.put("eficienciaAcademica", "100%");
+        resp.put("semestres", semestres);
+
+        return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping({"/perfil", "/{carnet}/perfil"})
+    public ResponseEntity<Map<String, Object>> obtenerPerfilEstudiante(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            HttpSession sesion) {
+        int carnetFinal = resolverCarnet(carnet, sesion);
+        Estudiante est = buscarPorCarnetInterno(carnetFinal);
+        if (est == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("carnet", est.getCarnet());
+        resp.put("nombre", est.getNombre());
+        resp.put("apellido", est.getApellido());
+        resp.put("nombreCompleto", est.getNombre() + " " + est.getApellido());
+        resp.put("fechaNacimiento", est.getFechaNacimiento() != null ? est.getFechaNacimiento() : "2005-04-12");
+        resp.put("correoInstitucional", est.getCorreo() != null ? est.getCorreo() : "estudiante" + est.getCarnet() + "@uvg.edu.gt");
+        resp.put("correoPersonal", "contacto." + est.getCarnet() + "@gmail.com");
+        resp.put("telefono", est.getTelefono() > 0 ? String.valueOf(est.getTelefono()) : "22458900");
+        resp.put("direccion", est.getDireccion() != null && !est.getDireccion().isBlank() ? est.getDireccion() : "Ciudad de Guatemala, Guatemala");
+        resp.put("carrera", "Ingeniería en Ciencias de la Computación");
+        resp.put("facultad", "Facultad de Ingeniería");
+        resp.put("fechaIngreso", est.getFechaIngreso() > 0 ? String.valueOf(est.getFechaIngreso()) : "2025");
+        resp.put("estado", est.getEstado() != null ? est.getEstado() : "Activo Regular");
+        resp.put("promedioGeneral", est.getPromedioGeneral() > 0 ? est.getPromedioGeneral() : 87.3);
+        resp.put("periodoActual", "Segundo Semestre 2026");
+        resp.put("campus", "Campus Central");
+        resp.put("jornada", "Mixta (Matutina / Nocturna)");
+
+        return ResponseEntity.ok(resp);
+    }
+
+    @PutMapping({"/perfil", "/{carnet}/perfil"})
+    public ResponseEntity<Map<String, Object>> actualizarPerfilEstudiante(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            @RequestBody Map<String, Object> datos,
+            HttpSession sesion) {
+        int carnetFinal = resolverCarnet(carnet, sesion);
+        Estudiante est = buscarPorCarnetInterno(carnetFinal);
+        if (est == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (datos.containsKey("telefono")) {
+            try {
+                String telStr = String.valueOf(datos.get("telefono")).replaceAll("[^0-9]", "");
+                if (!telStr.isBlank()) {
+                    est.setTelefono(Integer.parseInt(telStr));
+                }
+            } catch (Exception ignored) {}
+        }
+        if (datos.containsKey("direccion")) {
+            est.setDireccion(String.valueOf(datos.get("direccion")).trim());
+        }
+        guardar();
+
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("ok", true);
+        resp.put("mensaje", "Perfil actualizado correctamente.");
+        return ResponseEntity.ok(resp);
+    }
 }

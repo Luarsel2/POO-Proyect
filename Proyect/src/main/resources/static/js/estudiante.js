@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.carnetActual = carnet;
 
   function navegar(seccion) {
-    const vistas = ["inicio", "asignacion", "retiro", "horario", "notas"];
+    const vistas = ["inicio", "asignacion", "retiro", "horario", "notas", "historial", "perfil"];
     vistas.forEach(v => {
       const panel = document.getElementById("vista-" + v);
       const link = document.getElementById("link-nav-" + v);
@@ -53,7 +53,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       asignacion: { t: "Asignación de Cursos", s: "Selecciona tus asignaturas y secciones oficiales" },
       retiro: { t: "Retiro de Cursos", s: "Desasignación oficial y liberación de cupos" },
       horario: { t: "Mi Horario Semanal", s: "Distribución visual de clases y recesos UVG" },
-      notas: { t: "Mis Notas y Evaluaciones", s: "Seguimiento de zona acumulada y desglose de actividades" }
+      notas: { t: "Mis Notas y Evaluaciones", s: "Seguimiento de zona acumulada y desglose de actividades" },
+      historial: { t: "Historial Académico", s: "Registro consolidado de calificaciones y avance curricular" },
+      perfil: { t: "Mi Perfil Estudiantil", s: "Expediente oficial y datos personales del estudiante" }
     };
 
     const headerT = document.getElementById("topbar-seccion-titulo");
@@ -66,6 +68,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (seccion === "retiro") cargarRetiro(carnet);
     if (seccion === "horario") cargarHorario(carnet);
     if (seccion === "notas") cargarNotas(carnet);
+    if (seccion === "historial") cargarHistorial(carnet);
+    if (seccion === "perfil") cargarPerfil(carnet);
 
     window.location.hash = seccion;
   }
@@ -80,7 +84,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     { id: "link-nav-asignacion", s: "asignacion" },
     { id: "link-nav-retiro", s: "retiro" },
     { id: "link-nav-horario", s: "horario" },
-    { id: "link-nav-notas", s: "notas" }
+    { id: "link-nav-notas", s: "notas" },
+    { id: "link-nav-historial", s: "historial" },
+    { id: "link-nav-perfil", s: "perfil" }
   ];
 
   linksNav.forEach(item => {
@@ -791,3 +797,214 @@ if (btnCerrarModalNotas) btnCerrarModalNotas.addEventListener("click", cerrarMod
 
 const btnVolverNotas = document.getElementById("btn-volver-notas");
 if (btnVolverNotas) btnVolverNotas.addEventListener("click", cerrarModalNotas);
+
+let listaSemestresHistorialCache = [];
+
+async function cargarHistorial(carnet) {
+  const cont = document.getElementById("contenedor-semestres-historial");
+  if (!cont) return;
+
+  cont.innerHTML = '<p style="text-align:center;color:#7a897f;padding:28px;">Cargando historial académico...</p>';
+
+  try {
+    const resp = await fetch(`/api/estudiantes/${carnet}/historial`);
+    if (!resp.ok) {
+      cont.innerHTML = '<p style="text-align:center;color:#dc2626;padding:28px;">No se pudo cargar el historial académico.</p>';
+      return;
+    }
+
+    const data = await resp.json();
+    listaSemestresHistorialCache = data.semestres || [];
+
+    const txtPromedio = document.getElementById("txt-historial-promedio");
+    const txtCreditos = document.getElementById("txt-historial-creditos");
+    const txtCursos = document.getElementById("txt-historial-cursos");
+    const txtEficiencia = document.getElementById("txt-historial-eficiencia");
+
+    if (txtPromedio) txtPromedio.textContent = (data.promedioAcumulado || 0).toFixed(1);
+    if (txtCreditos) txtCreditos.textContent = data.creditosAprobados || 0;
+    if (txtCursos) txtCursos.textContent = data.cursosAprobados || 0;
+    if (txtEficiencia) txtEficiencia.textContent = data.eficienciaAcademica || "100%";
+
+    renderizarHistorialSemestres(listaSemestresHistorialCache);
+
+    const inputBuscar = document.getElementById("input-buscar-historial");
+    if (inputBuscar) {
+      inputBuscar.value = "";
+      inputBuscar.oninput = (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        if (!query) {
+          renderizarHistorialSemestres(listaSemestresHistorialCache);
+          return;
+        }
+        const filtrados = listaSemestresHistorialCache.map(sem => {
+          const cursosMatch = sem.cursos.filter(c =>
+            c.nombre.toLowerCase().includes(query) ||
+            c.codigo.toLowerCase().includes(query)
+          );
+          return { ...sem, cursos: cursosMatch };
+        }).filter(sem => sem.cursos.length > 0);
+        renderizarHistorialSemestres(filtrados);
+      };
+    }
+  } catch (err) {
+    cont.innerHTML = '<p style="text-align:center;color:#dc2626;padding:28px;">Error al conectar con el servidor.</p>';
+  }
+}
+
+function renderizarHistorialSemestres(semestres) {
+  const cont = document.getElementById("contenedor-semestres-historial");
+  if (!cont) return;
+
+  if (semestres.length === 0) {
+    cont.innerHTML = `
+      <div style="text-align: center; padding: 48px; background: white; border-radius: 12px; border: 1px solid var(--gris-borde);">
+        <h4 style="color: var(--verde-oscuro); margin-bottom: 6px;">No se encontraron asignaturas</h4>
+        <p style="color: #7a897f;">No hay resultados que coincidan con la búsqueda.</p>
+      </div>
+    `;
+    return;
+  }
+
+  cont.innerHTML = semestres.map(sem => {
+    return `
+      <div class="tarjeta-semestre-historial">
+        <div class="semestre-header">
+          <div class="semestre-header-info">
+            <span class="badge-semestre-periodo">${sem.periodo}</span>
+            <h4>Ciclo Finalizado</h4>
+          </div>
+          <div class="semestre-stats">
+            <div class="stat-semestre-item">
+              <span class="stat-sem-label">Créditos aprobados:</span>
+              <strong>${sem.creditosSemestre}</strong>
+            </div>
+            <div class="stat-semestre-item">
+              <span class="stat-sem-label">Promedio de ciclo:</span>
+              <strong style="color:var(--verde-oscuro);">${sem.promedioSemestre} pts</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table class="tabla-estudiante">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nombre del Curso</th>
+                <th>Créditos</th>
+                <th>Nota Final</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sem.cursos.map(c => `
+                <tr>
+                  <td><span class="badge-curso-codigo-sm">${c.codigo}</span></td>
+                  <td><strong>${c.nombre}</strong></td>
+                  <td>${c.creditos} Créditos</td>
+                  <td><strong style="color:var(--verde-oscuro);">${c.notaFinal} pts</strong></td>
+                  <td>
+                    <span class="badge-estado-aprobado">
+                      ${c.estado}
+                    </span>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function cargarPerfil(carnet) {
+  try {
+    const resp = await fetch(`/api/estudiantes/${carnet}/perfil`);
+    if (!resp.ok) return;
+
+    const data = await resp.json();
+
+    const nombreCompleto = data.nombreCompleto || "Estudiante Universitario";
+    const elNombre = document.getElementById("perfil-nombre-completo");
+    if (elNombre) elNombre.textContent = nombreCompleto;
+
+    const elCarnet = document.getElementById("perfil-badge-carnet");
+    if (elCarnet) elCarnet.textContent = "Carnet: " + (data.carnet || carnet);
+
+    const elEstado = document.getElementById("perfil-badge-estado");
+    if (elEstado) elEstado.textContent = data.estado || "Activo Regular";
+
+    const elAvatar = document.getElementById("perfil-avatar-iniciales");
+    if (elAvatar && nombreCompleto) {
+      const p = nombreCompleto.trim().split(" ");
+      elAvatar.textContent = p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : p[0].substring(0, 2).toUpperCase();
+    }
+
+    const setTxt = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val || "---";
+    };
+
+    setTxt("perfil-mini-carrera", data.carrera);
+    setTxt("perfil-mini-promedio", (data.promedioGeneral ? data.promedioGeneral.toFixed(1) : "87.3") + " pts");
+    setTxt("perfil-mini-ingreso", data.fechaIngreso);
+
+    setTxt("perfil-facultad", data.facultad);
+    setTxt("perfil-carrera", data.carrera);
+    setTxt("perfil-campus", data.campus);
+    setTxt("perfil-periodo", data.periodoActual);
+    setTxt("perfil-nacimiento", data.fechaNacimiento);
+    setTxt("perfil-jornada", data.jornada);
+
+    const inpCorreoInst = document.getElementById("perfil-input-correo-inst");
+    const inpCorreoPers = document.getElementById("perfil-input-correo-pers");
+    const inpTelefono = document.getElementById("perfil-input-telefono");
+    const inpDireccion = document.getElementById("perfil-input-direccion");
+
+    if (inpCorreoInst) inpCorreoInst.value = data.correoInstitucional || "";
+    if (inpCorreoPers) inpCorreoPers.value = data.correoPersonal || "";
+    if (inpTelefono) inpTelefono.value = data.telefono || "";
+    if (inpDireccion) inpDireccion.value = data.direccion || "";
+
+    const form = document.getElementById("form-perfil-contacto");
+    if (form) {
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btn-guardar-perfil");
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Guardando...";
+        }
+
+        try {
+          const res = await fetch(`/api/estudiantes/${carnet}/perfil`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              telefono: inpTelefono ? inpTelefono.value : "",
+              direccion: inpDireccion ? inpDireccion.value : ""
+            })
+          });
+
+          const resJson = await res.json();
+          if (res.ok && resJson.ok) {
+            mostrarToast("Datos de contacto actualizados exitosamente");
+          } else {
+            mostrarToast("No se pudieron guardar los cambios", true);
+          }
+        } catch (err) {
+          mostrarToast("Error de conexión al guardar cambios", true);
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Guardar Datos de Contacto";
+          }
+        }
+      };
+    }
+  } catch (err) {
+    console.error("Error al cargar perfil:", err);
+  }
+}

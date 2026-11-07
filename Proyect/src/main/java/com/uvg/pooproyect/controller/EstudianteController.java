@@ -3,6 +3,8 @@ package com.uvg.pooproyect.controller;
 import com.uvg.pooproyect.dto.Requests.EstudianteRequest;
 import com.uvg.pooproyect.model.Estudiante;
 import com.uvg.pooproyect.service.EstudianteService;
+import com.uvg.pooproyect.service.ConsultaAcademicaService;
+import com.uvg.pooproyect.service.AsignacionService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +17,12 @@ import java.util.Map;
 public class EstudianteController {
 
     private final EstudianteService estudianteService;
+    private final ConsultaAcademicaService consultaService;
+    private final AsignacionService asignacionService;
 
-    public EstudianteController(EstudianteService estudianteService) {
+    public EstudianteController(EstudianteService estudianteService, ConsultaAcademicaService consultaService, AsignacionService asignacionService) {
+        this.consultaService = consultaService;
+        this.asignacionService = asignacionService;
         this.estudianteService = estudianteService;
     }
 
@@ -44,7 +50,7 @@ public class EstudianteController {
     public ResponseEntity<Map<String, Object>> obtenerDashboardEstudiante(
             @PathVariable(value = "carnet", required = false) Integer carnet,
             HttpSession sesion) {
-        Map<String, Object> resp = estudianteService.obtenerDashboard(carnet, sesion);
+        Map<String, Object> resp = consultaService.obtenerDashboard(resolverCarnet(carnet, sesion));
         if (resp == null) {
             return ResponseEntity.notFound().build();
         }
@@ -55,7 +61,7 @@ public class EstudianteController {
     public ResponseEntity<Map<String, Object>> obtenerCursosDisponibles(
             @PathVariable(value = "carnet", required = false) Integer carnet,
             HttpSession sesion) {
-        return ResponseEntity.ok(estudianteService.obtenerCursosDisponibles(carnet, sesion));
+        return ResponseEntity.ok(consultaService.obtenerCursosDisponibles(resolverCarnet(carnet, sesion)));
     }
 
     @PostMapping({"/asignar-curso", "/{carnet}/asignar-curso"})
@@ -63,7 +69,7 @@ public class EstudianteController {
             @PathVariable(value = "carnet", required = false) Integer carnet,
             @RequestBody Map<String, Object> req,
             HttpSession sesion) {
-        Map<String, Object> res = estudianteService.asignarCurso(carnet, req, sesion);
+        Map<String, Object> res = asignacionService.asignarCurso(resolverCarnet(carnet, sesion), req);
         if (Boolean.FALSE.equals(res.get("ok"))) {
             return ResponseEntity.badRequest().body(res);
         }
@@ -75,7 +81,7 @@ public class EstudianteController {
             @PathVariable(value = "carnet", required = false) Integer carnet,
             @RequestBody Map<String, Object> req,
             HttpSession sesion) {
-        Map<String, Object> res = estudianteService.asignarHorarioCompleto(carnet, req, sesion);
+        Map<String, Object> res = asignacionService.asignarHorarioCompleto(resolverCarnet(carnet, sesion), req);
         if (Boolean.FALSE.equals(res.get("ok"))) {
             return ResponseEntity.badRequest().body(res);
         }
@@ -86,7 +92,7 @@ public class EstudianteController {
     public ResponseEntity<Map<String, Object>> retirarTodosLosCursos(
             @PathVariable(value = "carnet", required = false) Integer carnet,
             HttpSession sesion) {
-        Map<String, Object> res = estudianteService.retirarTodosLosCursos(carnet, sesion);
+        Map<String, Object> res = asignacionService.retirarTodosLosCursos(resolverCarnet(carnet, sesion));
         if (Boolean.FALSE.equals(res.get("ok"))) {
             return ResponseEntity.badRequest().body(res);
         }
@@ -98,7 +104,7 @@ public class EstudianteController {
             @PathVariable(value = "carnet", required = false) Integer carnet,
             @RequestBody Map<String, Object> req,
             HttpSession sesion) {
-        Map<String, Object> res = estudianteService.retirarCurso(carnet, req, sesion);
+        Map<String, Object> res = asignacionService.retirarCurso(resolverCarnet(carnet, sesion), req);
         if (Boolean.FALSE.equals(res.get("ok"))) {
             return ResponseEntity.badRequest().body(res);
         }
@@ -109,14 +115,14 @@ public class EstudianteController {
     public ResponseEntity<Map<String, Object>> obtenerHorarioEstudiante(
             @PathVariable(value = "carnet", required = false) Integer carnet,
             HttpSession sesion) {
-        return ResponseEntity.ok(estudianteService.obtenerHorario(carnet, sesion));
+        return ResponseEntity.ok(consultaService.obtenerHorario(resolverCarnet(carnet, sesion)));
     }
 
     @GetMapping({"/notas", "/{carnet}/notas"})
     public ResponseEntity<Map<String, Object>> obtenerNotasEstudiante(
             @PathVariable(value = "carnet", required = false) Integer carnet,
             HttpSession sesion) {
-        Map<String, Object> resp = estudianteService.obtenerNotas(carnet, sesion);
+        Map<String, Object> resp = consultaService.obtenerNotas(resolverCarnet(carnet, sesion));
         if (resp == null) {
             return ResponseEntity.notFound().build();
         }
@@ -127,7 +133,7 @@ public class EstudianteController {
     public ResponseEntity<Map<String, Object>> obtenerHistorialEstudiante(
             @PathVariable(value = "carnet", required = false) Integer carnet,
             HttpSession sesion) {
-        Map<String, Object> resp = estudianteService.obtenerHistorial(carnet, sesion);
+        Map<String, Object> resp = consultaService.obtenerHistorial(resolverCarnet(carnet, sesion));
         if (resp == null) {
             return ResponseEntity.notFound().build();
         }
@@ -138,7 +144,7 @@ public class EstudianteController {
     public ResponseEntity<Map<String, Object>> obtenerPerfilEstudiante(
             @PathVariable(value = "carnet", required = false) Integer carnet,
             HttpSession sesion) {
-        Map<String, Object> resp = estudianteService.obtenerPerfil(carnet, sesion);
+        Map<String, Object> resp = estudianteService.obtenerPerfil(resolverCarnet(carnet, sesion));
         if (resp == null) {
             return ResponseEntity.notFound().build();
         }
@@ -150,10 +156,25 @@ public class EstudianteController {
             @PathVariable(value = "carnet", required = false) Integer carnet,
             @RequestBody Map<String, Object> datos,
             HttpSession sesion) {
-        Map<String, Object> resp = estudianteService.actualizarPerfil(carnet, datos, sesion);
+        Map<String, Object> resp = estudianteService.actualizarPerfil(resolverCarnet(carnet, sesion), datos);
         if (resp == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(resp);
+    }
+
+    private int resolverCarnet(Integer carnet, HttpSession sesion) {
+        if (carnet != null && carnet > 0) {
+            return carnet;
+        }
+        if (sesion != null) {
+            Object sc = sesion.getAttribute("carnet");
+            if (sc != null) {
+                try {
+                    return Integer.parseInt(sc.toString());
+                } catch (Exception ignored) {}
+            }
+        }
+        return 26547;
     }
 }

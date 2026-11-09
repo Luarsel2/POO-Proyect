@@ -713,7 +713,7 @@ function renderizarTarjetasNotas(cursos) {
         <div class="barra-progreso-contenedor">
           <div class="barra-progreso-etiquetas">
             <span>Zona acumulada</span>
-            <strong>${pct}%</strong>
+            <strong>${pct}% (${c.zonaObtenida} / ${c.zonaTotal} pts)</strong>
           </div>
           <div class="barra-progreso-fondo">
             <div class="barra-progreso-relleno" style="width: ${pct}%; background: ${colorBarra};"></div>
@@ -750,7 +750,7 @@ function abrirModalNotas(curso) {
   document.getElementById("modal-nota-sub").textContent = `${curso.seccion || "Sección Única"} | Docente: ${curso.profesor} | ${curso.creditos} Créditos`;
 
   document.getElementById("modal-nota-zona").textContent = `${curso.zonaObtenida} / ${curso.zonaTotal} pts`;
-  document.getElementById("modal-nota-final").textContent = curso.examenFinal > 0 ? `${curso.examenFinal} pts` : "Pendiente (25 pts)";
+  document.getElementById("modal-nota-final").textContent = curso.examenFinal > 0 ? `${curso.examenFinal} pts` : "Pendiente";
   document.getElementById("modal-nota-total").textContent = `${curso.notaTotal} pts`;
 
   const tbody = document.getElementById("modal-nota-tabla-cuerpo");

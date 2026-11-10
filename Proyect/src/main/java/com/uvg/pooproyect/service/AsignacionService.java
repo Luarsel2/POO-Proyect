@@ -1,177 +1,103 @@
 package com.uvg.pooproyect.service;
 
-import com.uvg.pooproyect.dto.Requests.EstudianteRequest;
-import com.uvg.pooproyect.dto.RespuestaAcademica.*;
-import com.uvg.pooproyect.model.*;
+import com.uvg.pooproyect.model.SeccionCatalogo;
 import com.uvg.pooproyect.repository.*;
+import com.uvg.pooproyect.service.reglas.ReglaAsignacion;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
 public class AsignacionService {
-    private final EstudianteRepository estudianteRepository;
-    private final AsignacionRepository asignacionRepository;
-    private final CatalogoSeccionRepository catalogoRepository;
+    private final EstudianteRepository estudiantes;
+    private final AsignacionRepository asignaciones;
+    private final CatalogoSeccionRepository catalogo;
+    private final List<ReglaAsignacion> reglas;
 
-    public AsignacionService(EstudianteRepository estudianteRepository, AsignacionRepository asignacionRepository, CatalogoSeccionRepository catalogoRepository) {
-        this.estudianteRepository = estudianteRepository;
-        this.asignacionRepository = asignacionRepository;
-        this.catalogoRepository = catalogoRepository;
+    public AsignacionService(EstudianteRepository estudiantes, AsignacionRepository asignaciones,
+                             CatalogoSeccionRepository catalogo, List<ReglaAsignacion> reglas) {
+        this.estudiantes = estudiantes;
+        this.asignaciones = asignaciones;
+        this.catalogo = catalogo;
+        this.reglas = List.copyOf(reglas);
     }
 
-    public Map<String, Object> asignarCurso(int carnetFinal, Map<String, Object> req) {
-        Estudiante est = estudianteRepository.buscarPorCarnet(carnetFinal);
-        if (est == null) {
-            return Map.of("ok", false, "mensaje", "Estudiante no encontrado.");
-        }
-
-        Object idObj = req.get("idSeccion");
-        if (idObj == null) {
-            return Map.of("ok", false, "mensaje", "Debe especificar idSeccion.");
-        }
-        int idSeccion;
-        if (idObj instanceof Number n) {
-            idSeccion = n.intValue();
-        } else {
-            try {
-                idSeccion = Integer.parseInt(idObj.toString());
-            } catch (Exception ex) {
-                return Map.of("ok", false, "mensaje", "Identificador de sección inválido.");
-            }
-        }
-
-        SeccionCatalogo nueva = catalogoRepository.buscarSeccionCatalogo(idSeccion);
-        if (nueva == null) {
-            return Map.of("ok", false, "mensaje", "Sección no encontrada.");
-        }
-
-        List<Integer> asignados = new ArrayList<>(asignacionRepository.obtenerAsignacionesPorCarnet(carnetFinal));
-        if (asignados.contains(idSeccion)) {
-            return Map.of("ok", false, "mensaje", "Ya estás inscrito en esta sección.");
-        }
-
-        for (Integer yaId : new ArrayList<>(asignados)) {
-            SeccionCatalogo yaSec = catalogoRepository.buscarSeccionCatalogo(yaId);
-            if (yaSec != null && yaSec.codigoCurso.equalsIgnoreCase(nueva.codigoCurso)) {
-                asignados.remove(yaId);
-                if (yaSec.getCupoActual() > 0) {
-                    yaSec.liberarCupo();
-                }
-            }
-        }
-
-        if (nueva.getCupoActual() >= nueva.cupoMaximo) {
-            return Map.of("ok", false, "mensaje", "No hay cupos disponibles en esta sección.");
-        }
-
-        asignados.add(idSeccion);
-        nueva.reservarCupo();
-        asignacionRepository.guardarAsignaciones(carnetFinal, asignados);
-        est.inscribirCurso();
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("ok", true);
-        res.put("mensaje", "Asignación exitosa: " + nueva.nombreCurso + " (Sección " + nueva.codigoSeccion + " - " + nueva.jornada + ")");
-        return res;
+    public synchronized Map<String, Object> asignarCurso(int carnet, Map<String, Object> req) {
+        if (estudiantes.buscarPorCarnet(carnet) == null) return error("Estudiante no encontrado.");
+        Integer id = idSeccion(req);
+        if (id == null) return error("Debe especificar un identificador de sección válido.");
+        SeccionCatalogo nueva = catalogo.buscarSeccionCatalogo(id);
+        if (nueva == null) return error("Sección no encontrada.");
+        List<Integer> anteriores = asignaciones.obtenerAsignacionesPorCarnet(carnet);
+        if (anteriores.contains(id)) return error("Ya estás inscrito en esta sección.");
+        List<SeccionCatalogo> propuestas = new ArrayList<>(secciones(anteriores));
+        propuestas.removeIf(s -> s.codigoCurso.equalsIgnoreCase(nueva.codigoCurso));
+        propuestas.add(nueva);
+        Optional<String> problema = guardarSeleccion(carnet, anteriores, propuestas);
+        if (problema.isPresent()) return error(problema.get());
+        return Map.of("ok", true, "mensaje", "Asignación exitosa: " + nueva.nombreCurso
+            + " (Sección " + nueva.codigoSeccion + " - " + nueva.jornada + ")");
     }
 
-    public Map<String, Object> asignarHorarioCompleto(int carnetFinal, Map<String, Object> req) {
-        Estudiante est = estudianteRepository.buscarPorCarnet(carnetFinal);
-        if (est == null) {
-            return Map.of("ok", false, "mensaje", "Estudiante no encontrado.");
-        }
-
+    public synchronized Map<String, Object> asignarHorarioCompleto(int carnet, Map<String, Object> req) {
+        if (estudiantes.buscarPorCarnet(carnet) == null) return error("Estudiante no encontrado.");
         String jornada = String.valueOf(req.getOrDefault("jornada", "Matutina")).trim();
-        boolean esNocturna = jornada.equalsIgnoreCase("Nocturna");
-
-        List<Integer> idsDeseados = esNocturna
-                ? List.of(201, 202, 203, 204, 205, 206)
-                : List.of(101, 102, 103, 104, 105, 106);
-
-        List<Integer> asignados = new ArrayList<>(asignacionRepository.obtenerAsignacionesPorCarnet(carnetFinal));
-        for (Integer yaId : new ArrayList<>(asignados)) {
-            SeccionCatalogo sec = catalogoRepository.buscarSeccionCatalogo(yaId);
-            if (sec != null && sec.getCupoActual() > 0) {
-                sec.liberarCupo();
-            }
-        }
-        asignados.clear();
-
-        for (Integer nuevoId : idsDeseados) {
-            SeccionCatalogo sec = catalogoRepository.buscarSeccionCatalogo(nuevoId);
-            if (sec != null) {
-                asignados.add(nuevoId);
-                sec.reservarCupo();
-            }
-        }
-
-        asignacionRepository.guardarAsignaciones(carnetFinal, asignados);
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("ok", true);
-        res.put("jornada", esNocturna ? "Nocturna" : "Matutina");
-        res.put("mensaje", "Horario " + (esNocturna ? "Nocturno (15:00 - 21:00)" : "Matutino (07:00 - 12:00 / Vie 13:00)") + " asignado exitosamente (6 asignaturas).");
-        return res;
+        List<SeccionCatalogo> propuestas = catalogo.obtenerCatalogoSecciones().stream()
+            .filter(s -> s.jornada.equalsIgnoreCase(jornada)).toList();
+        if (propuestas.isEmpty()) return error("No hay secciones para esa jornada.");
+        List<Integer> anteriores = asignaciones.obtenerAsignacionesPorCarnet(carnet);
+        Optional<String> problema = guardarSeleccion(carnet, anteriores, propuestas);
+        if (problema.isPresent()) return error(problema.get());
+        String nombreJornada = propuestas.getFirst().jornada;
+        return Map.of("ok", true, "jornada", nombreJornada,
+            "mensaje", "Horario " + nombreJornada + " asignado exitosamente (" + propuestas.size() + " asignaturas).");
     }
 
-    public Map<String, Object> retirarTodosLosCursos(int carnetFinal) {
-        Estudiante est = estudianteRepository.buscarPorCarnet(carnetFinal);
-        if (est == null) {
-            return Map.of("ok", false, "mensaje", "Estudiante no encontrado.");
-        }
-
-        List<Integer> asignados = new ArrayList<>(asignacionRepository.obtenerAsignacionesPorCarnet(carnetFinal));
-        if (asignados != null) {
-            for (Integer idSec : asignados) {
-                SeccionCatalogo sec = catalogoRepository.buscarSeccionCatalogo(idSec);
-                if (sec != null && sec.getCupoActual() > 0) {
-                    sec.liberarCupo();
-                }
-            }
-            asignados.clear();
-        }
-        asignacionRepository.guardarAsignaciones(carnetFinal, asignados);
-
+    public synchronized Map<String, Object> retirarTodosLosCursos(int carnet) {
+        if (estudiantes.buscarPorCarnet(carnet) == null) return error("Estudiante no encontrado.");
+        List<Integer> anteriores = asignaciones.obtenerAsignacionesPorCarnet(carnet);
+        Optional<String> problema = guardarSeleccion(carnet, anteriores, List.of());
+        if (problema.isPresent()) return error(problema.get());
         return Map.of("ok", true, "mensaje", "Se han retirado todas las asignaturas correctamente.");
     }
 
-    public Map<String, Object> retirarCurso(int carnetFinal, Map<String, Object> req) {
-        Estudiante est = estudianteRepository.buscarPorCarnet(carnetFinal);
-        if (est == null) {
-            return Map.of("ok", false, "mensaje", "Estudiante no encontrado.");
-        }
-
-        Object idObj = req.get("idSeccion");
-        if (idObj == null) {
-            return Map.of("ok", false, "mensaje", "Debe especificar idSeccion.");
-        }
-        int idSeccion;
-        if (idObj instanceof Number n) {
-            idSeccion = n.intValue();
-        } else {
-            try {
-                idSeccion = Integer.parseInt(idObj.toString());
-            } catch (Exception ex) {
-                return Map.of("ok", false, "mensaje", "Identificador de sección inválido.");
-            }
-        }
-
-        List<Integer> asignados = new ArrayList<>(asignacionRepository.obtenerAsignacionesPorCarnet(carnetFinal));
-        if (asignados == null || !asignados.contains(idSeccion)) {
-            return Map.of("ok", false, "mensaje", "El estudiante no tiene asignada esa sección.");
-        }
-
-        asignados.remove(Integer.valueOf(idSeccion));
-        SeccionCatalogo sec = catalogoRepository.buscarSeccionCatalogo(idSeccion);
-        if (sec != null && sec.getCupoActual() > 0) {
-            sec.liberarCupo();
-        }
-        asignacionRepository.guardarAsignaciones(carnetFinal, asignados);
-        est.retirarCurso();
-
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("ok", true);
-        res.put("mensaje", "Curso retirado exitosamente: " + (sec != null ? sec.nombreCurso : "Sección " + idSeccion));
-        return res;
+    public synchronized Map<String, Object> retirarCurso(int carnet, Map<String, Object> req) {
+        if (estudiantes.buscarPorCarnet(carnet) == null) return error("Estudiante no encontrado.");
+        Integer id = idSeccion(req);
+        if (id == null) return error("Debe especificar un identificador de sección válido.");
+        List<Integer> anteriores = asignaciones.obtenerAsignacionesPorCarnet(carnet);
+        if (!anteriores.contains(id)) return error("El estudiante no tiene asignada esa sección.");
+        List<SeccionCatalogo> propuestas = secciones(anteriores).stream().filter(s -> s.idSeccion != id).toList();
+        Optional<String> problema = guardarSeleccion(carnet, anteriores, propuestas);
+        if (problema.isPresent()) return error(problema.get());
+        SeccionCatalogo retirada = catalogo.buscarSeccionCatalogo(id);
+        return Map.of("ok", true, "mensaje", "Curso retirado exitosamente: "
+            + (retirada == null ? "Sección " + id : retirada.nombreCurso));
     }
+
+    private Optional<String> guardarSeleccion(int carnet, List<Integer> idsAnteriores,
+                                               List<SeccionCatalogo> propuestas) {
+        List<SeccionCatalogo> anteriores = secciones(idsAnteriores);
+        List<SeccionCatalogo> seleccion = List.copyOf(propuestas);
+        for (ReglaAsignacion regla : reglas) {
+            Optional<String> problema = regla.validar(anteriores, seleccion);
+            if (problema.isPresent()) return problema;
+        }
+        List<Integer> nuevosIds = seleccion.stream().map(s -> s.idSeccion).toList();
+        // La escritura ocurre antes de modificar cupos; un error no deja una selección parcial.
+        asignaciones.guardarAsignaciones(carnet, nuevosIds);
+        anteriores.stream().filter(s -> !nuevosIds.contains(s.idSeccion)).forEach(SeccionCatalogo::liberarCupo);
+        seleccion.stream().filter(s -> !idsAnteriores.contains(s.idSeccion)).forEach(SeccionCatalogo::reservarCupo);
+        return Optional.empty();
+    }
+
+    private List<SeccionCatalogo> secciones(List<Integer> ids) {
+        return ids.stream().map(catalogo::buscarSeccionCatalogo).filter(Objects::nonNull).toList();
+    }
+
+    private Integer idSeccion(Map<String, Object> req) {
+        try { return Integer.valueOf(String.valueOf(req.get("idSeccion"))); }
+        catch (NumberFormatException e) { return null; }
+    }
+
+    private Map<String, Object> error(String mensaje) { return Map.of("ok", false, "mensaje", mensaje); }
 }

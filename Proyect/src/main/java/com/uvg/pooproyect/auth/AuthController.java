@@ -1,10 +1,7 @@
 package com.uvg.pooproyect.auth;
 
-import com.uvg.pooproyect.controller.EstudianteController;
-import com.uvg.pooproyect.model.Estudiante;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,75 +16,23 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    public static final String ROL_ADMIN = "ADMIN";
-    public static final String ROL_ESTUDIANTE = "ESTUDIANTE";
-
-    private static final Map<Integer, String> CLAVES_ESTUDIANTES = Map.of(
-            26547, "uvg26547",
-            26710, "uvg26710",
-            26000, "uvg26000"
-    );
-
+    public static final String ROL_ADMIN = Roles.ADMIN;
+    public static final String ROL_ESTUDIANTE = Roles.ESTUDIANTE;
     public record LoginRequest(String usuario, String clave) {}
-
-    private final EstudianteController estudianteController;
-    private final CuentaController cuentaController;
-    private final String adminUsuario;
-    private final String adminClave;
-
-    public AuthController(EstudianteController estudianteController,
-                          CuentaController cuentaController,
-                          @Value("${portal.admin.usuario:admin}") String adminUsuario,
-                          @Value("${portal.admin.clave:admin123}") String adminClave) {
-        this.estudianteController = estudianteController;
-        this.cuentaController = cuentaController;
-        this.adminUsuario = adminUsuario;
-        this.adminClave = adminClave;
-    }
+    private final com.uvg.pooproyect.service.AuthService service;
+    public AuthController(com.uvg.pooproyect.service.AuthService service) { this.service = service; }
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest req, HttpServletRequest request) {
-        String usuario = req.usuario() == null ? "" : req.usuario().trim();
-        String clave = req.clave() == null ? "" : req.clave().trim();
-
-        // 1) ¿Es el administrador?
-        if (usuario.equals(adminUsuario) && clave.equals(adminClave)) {
-            HttpSession nueva = sesionNueva(request);
-            nueva.setAttribute("rol", ROL_ADMIN);
-            nueva.setAttribute("nombre", "Administrador");
-            return ResponseEntity.ok(Map.of(
-                    "mensaje", "Bienvenido, administrador.",
-                    "rol", ROL_ADMIN,
-                    "redirect", "index.html"));
-        }
-
-
-        try {
-            int carnet = Integer.parseInt(usuario);
-            String claveEsperada = CLAVES_ESTUDIANTES.get(carnet);
-            boolean esValida = (claveEsperada != null && claveEsperada.equals(clave))
-                    || ("uvg" + carnet).equals(clave)
-                    || (cuentaController != null && cuentaController.verificar(carnet, clave));
-
-            if (esValida) {
-                Estudiante e = estudianteController.buscarPorCarnet(carnet);
-                if (e != null) {
-                    HttpSession nueva = sesionNueva(request);
-                    nueva.setAttribute("rol", ROL_ESTUDIANTE);
-                    nueva.setAttribute("carnet", carnet);
-                    nueva.setAttribute("nombre", e.getNombre() + " " + e.getApellido());
-                    return ResponseEntity.ok(Map.of(
-                            "mensaje", "Bienvenido, " + e.getNombre() + ".",
-                            "rol", ROL_ESTUDIANTE,
-                            "redirect", "dashboard-estudiante.html"));
-                }
-            }
-        } catch (NumberFormatException ignorado) {
-        }
-
-        // Mismo mensaje para "usuario no existe" y "clave incorrecta" a propósito.
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("mensaje", "Usuario o contraseña incorrectos."));
+        var acceso = service.autenticar(req.usuario(), req.clave());
+        if (acceso.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(Map.of("mensaje", "Usuario o contraseña incorrectos."));
+        var usuario = acceso.get();
+        HttpSession sesion = sesionNueva(request);
+        sesion.setAttribute("rol", usuario.rol());
+        sesion.setAttribute("nombre", usuario.nombre());
+        if (usuario.carnet() != null) sesion.setAttribute("carnet", usuario.carnet());
+        return ResponseEntity.ok(Map.of("mensaje", usuario.mensaje(), "rol", usuario.rol(), "redirect", usuario.redirect()));
     }
 
     @PostMapping("/logout")

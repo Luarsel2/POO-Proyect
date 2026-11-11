@@ -92,6 +92,29 @@ class PortalRegressionTest {
         assertEquals(900, inscripciones.buscarPorId(900).getDetalles().getFirst().getSeccion().getIdSeccion());
     }
 
+    @Test void cicloDeCuentaYCompatibilidadDeClaves() throws Exception {
+        MockHttpSession s = admin();
+        enviar(s, "/api/estudiantes", "{\"id\":43,\"carnet\":43,\"nombre\":\"Cuenta\",\"apellido\":\"Test\",\"correo\":\"cuenta@uvg.edu.gt\"}");
+        enviar(s, "/api/cuentas", "{\"carnet\":43,\"clave\":\"claveInicial\"}");
+        mvc.perform(post("/api/cuentas").session(s).contentType("application/json")
+            .content("{\"carnet\":43,\"clave\":\"claveInicial\"}")).andExpect(status().isConflict());
+        mvc.perform(put("/api/cuentas/43").session(s).contentType("application/json")
+            .content("{\"clave\":\"123\"}")).andExpect(status().isBadRequest());
+        mvc.perform(put("/api/cuentas/43").session(s).contentType("application/json")
+            .content("{\"clave\":\"claveNueva\"}")).andExpect(status().isOk());
+        mvc.perform(post("/api/auth/login").contentType("application/json")
+            .content("{\"usuario\":\"43\",\"clave\":\"claveInicial\"}")).andExpect(status().isUnauthorized());
+        MockHttpSession alumno = (MockHttpSession) mvc.perform(post("/api/auth/login").contentType("application/json")
+            .content("{\"usuario\":\"43\",\"clave\":\"claveNueva\"}"))
+            .andExpect(status().isOk()).andReturn().getRequest().getSession(false);
+        var recargado = new CsvCuentaRepository(); recargado.cargar();
+        assertEquals(new com.uvg.pooproyect.auth.Sha256CodificadorClave().cifrar(43, "claveNueva"), recargado.buscarHash(43));
+        mvc.perform(delete("/api/cuentas/43").session(s)).andExpect(status().isOk());
+        mvc.perform(get("/api/estudiantes/43/perfil").session(alumno)).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/cuentas").session(s).contentType("application/json")
+            .content("{\"carnet\":987654,\"clave\":\"claveInicial\"}")).andExpect(status().isNotFound());
+    }
+
     private void enviar(MockHttpSession s, String ruta, String cuerpo) throws Exception {
         mvc.perform(post(ruta).session(s).contentType("application/json").content(cuerpo))
             .andExpect(status().isOk()).andExpect(jsonPath("$.mensaje").exists());

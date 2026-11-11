@@ -13,10 +13,10 @@ import java.io.IOException;
 @Component
 public class AuthFilter extends OncePerRequestFilter {
 
-    private final CuentaController cuentaController;
+    private final ConsultaCuenta consultaCuenta;
 
-    public AuthFilter(CuentaController cuentaController) {
-        this.cuentaController = cuentaController;
+    public AuthFilter(ConsultaCuenta consultaCuenta) {
+        this.consultaCuenta = consultaCuenta;
     }
 
     @Override
@@ -28,8 +28,8 @@ public class AuthFilter extends OncePerRequestFilter {
         String rol = sesion == null ? null : (String) sesion.getAttribute("rol");
 
         // Si el administrador eliminó la cuenta de este estudiante, se cierra su sesión.
-        if (AuthController.ROL_ESTUDIANTE.equals(rol)
-                && !cuentaController.existe((Integer) sesion.getAttribute("carnet"))) {
+        if (Roles.ESTUDIANTE.equals(rol)
+                && !consultaCuenta.existe((Integer) sesion.getAttribute("carnet"))) {
             sesion.invalidate();
             sesion = null;
             rol = null;
@@ -54,13 +54,13 @@ public class AuthFilter extends OncePerRequestFilter {
         }
 
         // El administrador tiene acceso a todo el panel administrativo y APIs
-        if (AuthController.ROL_ADMIN.equals(rol)) {
+        if (Roles.ADMIN.equals(rol)) {
             chain.doFilter(req, resp);   // si el estudiante es admin, lo deja pasar
             return;
         }
 
         // El estudiante solo tiene acceso a sus vistas y a sus endpoints autorizados
-        if (AuthController.ROL_ESTUDIANTE.equals(rol)) {
+        if (Roles.ESTUDIANTE.equals(rol)) {
             if (esApi) { // revisa que el estudiante este intentando obtener o guardar datos puros en la base de datos
                 if (estudiantePuedeUsarApi(req.getMethod(), path, sesion)) {
                     chain.doFilter(req, resp);// evalua si el estudiante tiene permiso para usar esa ruta de 
@@ -98,8 +98,8 @@ public class AuthFilter extends OncePerRequestFilter {
     }
 
     private String destinoSegunRol(String rol) {
-        if (AuthController.ROL_ADMIN.equals(rol)) return "/index.html";
-        if (AuthController.ROL_ESTUDIANTE.equals(rol)) return "/dashboard-estudiante.html";
+        if (Roles.ADMIN.equals(rol)) return "/index.html";
+        if (Roles.ESTUDIANTE.equals(rol)) return "/dashboard-estudiante.html";
         return "/login.html";
     }
 

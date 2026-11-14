@@ -1,16 +1,10 @@
 package com.uvg.pooproyect.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class Profesor extends Empleado {
     private String especialidad;
     private String materias;
-    
-    private static final String ARCHIVO = "profesores.csv";
-    private List<Profesor> listaProfesores = new ArrayList<>();
+
 
     public Profesor(int id, String nombre, String apellido, String fechaNacimiento, String correo, int telefono, String direccion, int codigoDeEmpleado, String fechaDeContratacion, String especialidad, String materias) {
         super(id, nombre, apellido, fechaNacimiento, correo, telefono, direccion, codigoDeEmpleado, fechaDeContratacion);
@@ -24,32 +18,6 @@ public class Profesor extends Empleado {
 
     public void consultarCursos() {
         System.out.println("Consultando cursos...");
-    }
-
-    public Profesor buscarPorCodigo(int codigo) {
-        for (Profesor p : listaProfesores) {
-            if (p.getCodigoDeEmpleado() == codigo) {
-                return p;
-            }
-        }
-        return null;
-    }
-
-    private void guardar() {
-        //  persistencia en archivo profesores.csv
-    }
-
-    public void cargar() {
-        // lectura desde archivo profesores.csv
-    }
-
-    public Map<String, String> registrarProfesor() {
-        // registro del profesor y retornar mensaje/estado
-        return Map.of("mensaje", "Profesor registrado exitosamente");
-    }
-
-    public List<Profesor> obtenerTodos() {
-        return listaProfesores;
     }
 
     public String getEspecialidad() {
@@ -68,11 +36,4 @@ public class Profesor extends Empleado {
         this.materias = materias;
     }
 
-    public List<Profesor> getListaProfesores() {
-        return listaProfesores;
-    }
-
-    public void setListaProfesores(List<Profesor> listaProfesores) {
-        this.listaProfesores = listaProfesores;
-    }
 }

@@ -34,6 +34,6 @@ public class Universidad {
     }
 
     public List<Facultad> getFacultades(){
-        return facultades;
+        return List.copyOf(facultades);
     }
 }

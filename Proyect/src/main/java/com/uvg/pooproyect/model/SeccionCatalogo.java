@@ -15,6 +15,7 @@ public class SeccionCatalogo {
     public final String color;
     public final int cupoMaximo;
     private int cupoActual;
+    private final int cupoBase;
     public final List<BloqueHorario> bloques;
 
     public SeccionCatalogo(int idSeccion, int codigoSeccion, String codigoCurso, String nombreCurso, int creditos,
@@ -32,8 +33,16 @@ public class SeccionCatalogo {
         this.color = color;
         this.cupoMaximo = cupoMaximo;
         this.cupoActual = cupoActual;
+        this.cupoBase = cupoActual;
         this.bloques = List.copyOf(bloques);
     }
+    public void restaurarAsignaciones(int cantidad) {
+        if (cantidad < 0 || cupoBase + cantidad > cupoMaximo) {
+            throw new IllegalStateException("Las asignaciones guardadas exceden el cupo de la sección " + idSeccion);
+        }
+        cupoActual = cupoBase + cantidad;
+    }
+
     public int getCupoActual() { return cupoActual; }
 
     public void reservarCupo() {

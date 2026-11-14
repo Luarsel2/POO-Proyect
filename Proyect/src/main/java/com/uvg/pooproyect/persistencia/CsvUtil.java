@@ -1,6 +1,9 @@
 package com.uvg.pooproyect.persistencia;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.StandardCopyOption;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -66,35 +69,42 @@ public class CsvUtil {
                 filas.add(linea.split(",", -1));
             }
         } catch (IOException e) {
-            System.out.println("No se pudo leer " + nombreArchivo + ": " + e.getMessage());
+            throw new UncheckedIOException("No se pudo leer " + nombreArchivo, e);
         }
         return filas;
     }
 
     // Sobreescribe el archivo completo con las filas actuales. Es la forma
     // más simple de mantener el archivo sincronizado con la lista en
-    // memoria del controlador, sin tener que llevar control de qué línea
+    // memoria del repositorio, sin tener que llevar control de qué línea
     // corresponde a qué registro.
     public static void escribirFilas(String nombreArchivo, List<String[]> filas) {
+        Path temporal = null;
         try {
-            Path destino = rutaArchivo(nombreArchivo);
-            if (destino.getParent() != null) {
-                Files.createDirectories(destino.getParent());
-            }
+            Path destino = rutaArchivo(nombreArchivo).toAbsolutePath();
+            Files.createDirectories(destino.getParent());
+            temporal = Files.createTempFile(destino.getParent(), ".portal-", ".tmp");
             List<String> lineas = new ArrayList<>();
-            for (String[] fila : filas) {
-                lineas.add(String.join(",", fila));
+            for (String[] fila : filas) lineas.add(String.join(",", fila));
+            Files.write(temporal, lineas, StandardCharsets.UTF_8);
+            try {
+                Files.move(temporal, destino, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(temporal, destino, StandardCopyOption.REPLACE_EXISTING);
             }
-            Files.write(destino, lineas, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            System.out.println("No se pudo guardar " + nombreArchivo + ": " + e.getMessage());
+            throw new UncheckedIOException("No se pudo guardar " + nombreArchivo, e);
+        } finally {
+            if (temporal != null) {
+                try { Files.deleteIfExists(temporal); } catch (IOException ignored) { }
+            }
         }
     }
 
     // Evita que un valor con comas rompa el formato de columnas.
     public static String escapar(String valor) {
         if (valor == null) return "";
-        return valor.replace(",", ";");
+        return valor.replace(",", ";").replace("\n", " ").replace("\r", " ");
     }
 
     // Convierte "" a null y deja cualquier otro texto tal cual al leerlo de vuelta.

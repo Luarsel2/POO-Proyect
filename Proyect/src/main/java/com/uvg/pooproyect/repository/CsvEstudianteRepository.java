@@ -45,7 +45,11 @@ public class CsvEstudianteRepository implements EstudianteRepository {
     }
     public Estudiante guardar(Estudiante estudiante) {
         listaEstudiantes.add(estudiante);
-        guardarEnCsv();
+        try { guardarEnCsv(); }
+        catch (RuntimeException error) {
+            listaEstudiantes.removeLast();
+            throw error;
+        }
         return estudiante;
     }
     public void sincronizarEstudiantes() {

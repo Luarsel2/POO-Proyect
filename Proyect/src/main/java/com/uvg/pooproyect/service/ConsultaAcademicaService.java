@@ -1,6 +1,5 @@
 package com.uvg.pooproyect.service;
 
-import com.uvg.pooproyect.dto.Requests.EstudianteRequest;
 import com.uvg.pooproyect.dto.RespuestaAcademica.*;
 import com.uvg.pooproyect.model.*;
 import com.uvg.pooproyect.repository.*;

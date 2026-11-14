@@ -36,6 +36,6 @@ public class PlanDeEstudio {
     }
 
     public List<Curso> getCursos(){
-        return cursos;
+        return List.copyOf(cursos);
     }
 }

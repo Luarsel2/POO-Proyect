@@ -63,7 +63,7 @@ public class AuthFilter extends OncePerRequestFilter {
         if (Roles.ESTUDIANTE.equals(rol)) {
             if (esApi) { // revisa que el estudiante este intentando obtener o guardar datos puros en la base de datos
                 if (estudiantePuedeUsarApi(req.getMethod(), path, sesion)) {
-                    chain.doFilter(req, resp);// evalua si el estudiante tiene permiso para usar esa ruta de 
+                    chain.doFilter(req, resp);// evalua si el estudiante tiene permiso para usar esa ruta de
                     // API en específico, revisando qué acción quiere hacer, a qué ruta y quién es es decir su sesión.
                 } else {
                     denegar(resp, true, 403, null);

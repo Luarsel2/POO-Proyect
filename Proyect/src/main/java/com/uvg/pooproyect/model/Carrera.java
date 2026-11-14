@@ -43,6 +43,6 @@ public class Carrera {
     }
 
     public List<PlanDeEstudio> getPlanesDeEstudios(){
-        return planesDeEstudios;
+        return List.copyOf(planesDeEstudios);
     }
 }

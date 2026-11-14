@@ -27,11 +27,11 @@ public class CsvCarreraRepository implements CarreraRepository {
                 for (String bloquePlan : col[3].split(";")) {
                     String[] campos = bloquePlan.split(":", -1);
                     if (campos.length < 2) continue;
-                    
+
                     int year = CsvUtil.leerEntero(campos[0], 0);
                     String estado = campos[1];
                     carrera.agregarPlanDeEstudio(year, estado);
-                    
+
                     if (campos.length > 2 && !campos[2].isBlank()) {
                         PlanDeEstudio plan = carrera.getPlanesDeEstudios().get(carrera.getPlanesDeEstudios().size() - 1);
                         for (String nombreCurso : campos[2].split("\\|")) {
@@ -61,9 +61,9 @@ public class CsvCarreraRepository implements CarreraRepository {
                     .collect(Collectors.joining(";"));
 
             filas.add(new String[]{
-                    CsvUtil.escapar(c.getNombre()), 
+                    CsvUtil.escapar(c.getNombre()),
                     CsvUtil.escapar(c.getTotalCreditos()),
-                    String.valueOf(c.getDuracionPromedio()), 
+                    String.valueOf(c.getDuracionPromedio()),
                     planesEncoded
             });
         }

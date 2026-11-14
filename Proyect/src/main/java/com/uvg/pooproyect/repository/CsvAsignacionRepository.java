@@ -15,11 +15,6 @@ public class CsvAsignacionRepository implements AsignacionRepository {
     public void cargar() {
         asignacionesPorCarnet.clear();
         List<String[]> filas = CsvUtil.leerFilas(ARCHIVO_ASIGNACIONES);
-        if (filas.isEmpty()) {
-            asignacionesPorCarnet.put(26547, new ArrayList<>());
-            guardarAsignacionesEnCsv();
-            return;
-        }
         for (String[] col : filas) {
             if (col.length >= 2) {
                 int carnet = CsvUtil.leerEntero(col[0], 0);
@@ -28,6 +23,13 @@ public class CsvAsignacionRepository implements AsignacionRepository {
                     asignacionesPorCarnet.computeIfAbsent(carnet, k -> new ArrayList<>()).add(idSec);
                 }
             }
+        }
+        Map<Integer, Integer> inscritos = new HashMap<>();
+        for (List<Integer> seleccion : asignacionesPorCarnet.values()) {
+            for (Integer id : seleccion) inscritos.merge(id, 1, Integer::sum);
+        }
+        for (var seccion : catalogo.obtenerCatalogoSecciones()) {
+            seccion.restaurarAsignaciones(inscritos.getOrDefault(seccion.idSeccion, 0));
         }
     }
     private void guardarAsignacionesEnCsv() {

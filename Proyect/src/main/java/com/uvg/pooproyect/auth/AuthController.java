@@ -12,10 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-// Estudiante: usuario = carnet, contraseña = la que asigna el administrador
-// en la pagina Cuentas (al crear la cuenta). Cuentas ya existentes al
-// primer arranque: contraseña inicial = correo del estudiante.
-// Administrador: usuario admin, contraseña admin123 (application.properties)
+// usuario de estudiante es: 26547 y contraseña es prueba26547@uvg.edu.gt
+// usuario de admin es: admin y contraseña admin123
 
 @RestController
 @RequestMapping("/api/auth")

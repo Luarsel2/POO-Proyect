@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.carnetActual = carnet;
 
   function navegar(seccion) {
-    const vistas = ["inicio", "asignacion", "retiro", "horario"];
+    const vistas = ["inicio", "asignacion", "retiro", "horario", "notas", "historial", "perfil"];
     vistas.forEach(v => {
       const panel = document.getElementById("vista-" + v);
       const link = document.getElementById("link-nav-" + v);
@@ -52,7 +52,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       inicio: { t: "Panel Principal", s: "Bienvenido a tu portal académico universitario" },
       asignacion: { t: "Asignación de Cursos", s: "Selecciona tus asignaturas y secciones oficiales" },
       retiro: { t: "Retiro de Cursos", s: "Desasignación oficial y liberación de cupos" },
-      horario: { t: "Mi Horario Semanal", s: "Distribución visual de clases y recesos UVG" }
+      horario: { t: "Mi Horario Semanal", s: "Distribución visual de clases y recesos UVG" },
+      notas: { t: "Mis Notas y Evaluaciones", s: "Seguimiento de zona acumulada y desglose de actividades" },
+      historial: { t: "Historial Académico", s: "Registro consolidado de calificaciones y avance curricular" },
+      perfil: { t: "Mi Perfil Estudiantil", s: "Expediente oficial y datos personales del estudiante" }
     };
 
     const headerT = document.getElementById("topbar-seccion-titulo");
@@ -64,6 +67,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (seccion === "asignacion") cargarAsignacion(carnet);
     if (seccion === "retiro") cargarRetiro(carnet);
     if (seccion === "horario") cargarHorario(carnet);
+    if (seccion === "notas") cargarNotas(carnet);
+    if (seccion === "historial") cargarHistorial(carnet);
+    if (seccion === "perfil") cargarPerfil(carnet);
 
     window.location.hash = seccion;
   }
@@ -77,7 +83,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     { id: "link-nav-inicio", s: "inicio" },
     { id: "link-nav-asignacion", s: "asignacion" },
     { id: "link-nav-retiro", s: "retiro" },
-    { id: "link-nav-horario", s: "horario" }
+    { id: "link-nav-horario", s: "horario" },
+    { id: "link-nav-notas", s: "notas" },
+    { id: "link-nav-historial", s: "historial" },
+    { id: "link-nav-perfil", s: "perfil" }
   ];
 
   linksNav.forEach(item => {
@@ -612,5 +621,390 @@ async function cargarHorario(carnet) {
 
   } catch (err) {
     console.error("Error al cargar horario:", err);
+  }
+}
+
+let listaNotasCache = [];
+
+async function cargarNotas(carnet) {
+  const grid = document.getElementById("grid-cursos-notas");
+  if (!grid) return;
+
+  grid.innerHTML = '<p style="text-align:center;color:#7a897f;padding:28px;">Cargando calificaciones...</p>';
+
+  try {
+    const resp = await fetch(`/api/estudiantes/${carnet}/notas`);
+    if (!resp.ok) {
+      grid.innerHTML = '<p style="text-align:center;color:#dc2626;padding:28px;">No se pudieron cargar las calificaciones.</p>';
+      return;
+    }
+
+    const data = await resp.json();
+    listaNotasCache = data.cursos || [];
+
+    const txtPromedio = document.getElementById("txt-notas-promedio");
+    const txtCursos = document.getElementById("txt-notas-cursos");
+    const txtCreditos = document.getElementById("txt-notas-creditos");
+    const txtEstado = document.getElementById("txt-notas-estado");
+
+    if (txtPromedio) txtPromedio.textContent = (data.promedioZona || 0).toFixed(1) + "%";
+    if (txtCursos) txtCursos.textContent = data.totalCursos || listaNotasCache.length;
+    if (txtCreditos) txtCreditos.textContent = data.totalCreditos || 0;
+    if (txtEstado) {
+      const prom = data.promedioZona || 0;
+      txtEstado.textContent = prom >= 80 ? "Sobresaliente" : (prom >= 61 ? "Satisfactorio" : "En riesgo");
+      txtEstado.style.color = prom >= 61 ? "#059669" : "#dc2626";
+    }
+
+    renderizarTarjetasNotas(listaNotasCache);
+
+    const inputBuscar = document.getElementById("input-buscar-notas");
+    if (inputBuscar) {
+      inputBuscar.value = "";
+      inputBuscar.oninput = (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const filtrados = listaNotasCache.filter(c =>
+          c.nombreCurso.toLowerCase().includes(query) ||
+          c.codigoCurso.toLowerCase().includes(query) ||
+          c.profesor.toLowerCase().includes(query)
+        );
+        renderizarTarjetasNotas(filtrados);
+      };
+    }
+
+  } catch (err) {
+    grid.innerHTML = '<p style="text-align:center;color:#dc2626;padding:28px;">Error al conectar con el servidor.</p>';
+  }
+}
+
+function renderizarTarjetasNotas(cursos) {
+  const grid = document.getElementById("grid-cursos-notas");
+  if (!grid) return;
+
+  if (cursos.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 48px; background: white; border-radius: 12px; border: 1px solid var(--gris-borde);">
+        <h4 style="color: var(--verde-oscuro); margin-bottom: 6px;">No se encontraron cursos</h4>
+        <p style="color: #7a897f;">No hay resultados con el criterio de búsqueda actual.</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = cursos.map((c, index) => {
+    const pct = c.zonaTotal > 0 ? Math.round((c.zonaObtenida / c.zonaTotal) * 100) : 0;
+    const colorBarra = pct >= 80 ? "#059669" : (pct >= 60 ? "#0284c7" : "#ea580c");
+
+    return `
+      <div class="tarjeta-nota-curso" style="border-top: 4px solid ${c.color || '#0b4d33'};">
+        <div class="tarjeta-nota-header">
+          <div>
+            <span class="badge-curso-codigo" style="background:${c.color || '#0b4d33'};">${c.codigoCurso}</span>
+            <h4 class="tarjeta-nota-titulo">${c.nombreCurso}</h4>
+            <span class="tarjeta-nota-sub">${c.seccion || "Sección Única"} | ${c.creditos} Créditos</span>
+            <span class="tarjeta-nota-profesor">${c.profesor}</span>
+          </div>
+          <div class="tarjeta-nota-puntos">
+            <span class="puntos-obtenidos">${c.zonaObtenida}</span>
+            <span class="puntos-totales">/ ${c.zonaTotal} pts</span>
+          </div>
+        </div>
+
+        <div class="barra-progreso-contenedor">
+          <div class="barra-progreso-etiquetas">
+            <span>Zona acumulada</span>
+            <strong>${pct}% (${c.zonaObtenida} / ${c.zonaTotal} pts)</strong>
+          </div>
+          <div class="barra-progreso-fondo">
+            <div class="barra-progreso-relleno" style="width: ${pct}%; background: ${colorBarra};"></div>
+          </div>
+        </div>
+
+        <div class="tarjeta-nota-footer">
+          <span class="badge-estado-nota en-curso">${c.estado}</span>
+          <button type="button" class="btn-ver-detalle-nota" data-index="${index}">
+            Ver desglose de notas
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  const botones = grid.querySelectorAll(".btn-ver-detalle-nota");
+  botones.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = parseInt(btn.getAttribute("data-index"), 10);
+      const curso = cursos[idx];
+      if (curso) abrirModalNotas(curso);
+    });
+  });
+}
+
+function abrirModalNotas(curso) {
+  const modal = document.getElementById("modal-detalle-notas");
+  if (!modal) return;
+
+  document.getElementById("modal-nota-codigo").textContent = curso.codigoCurso;
+  document.getElementById("modal-nota-codigo").style.background = curso.color || "var(--verde-oscuro)";
+  document.getElementById("modal-nota-titulo").textContent = curso.nombreCurso;
+  document.getElementById("modal-nota-sub").textContent = `${curso.seccion || "Sección Única"} | Docente: ${curso.profesor} | ${curso.creditos} Créditos`;
+
+  document.getElementById("modal-nota-zona").textContent = `${curso.zonaObtenida} / ${curso.zonaTotal} pts`;
+  document.getElementById("modal-nota-final").textContent = curso.examenFinal > 0 ? `${curso.examenFinal} pts` : "Pendiente";
+  document.getElementById("modal-nota-total").textContent = `${curso.notaTotal} pts`;
+
+  const tbody = document.getElementById("modal-nota-tabla-cuerpo");
+  if (tbody) {
+    if (!curso.desglose || curso.desglose.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#7a897f;">No hay actividades registradas aún.</td></tr>';
+    } else {
+      tbody.innerHTML = curso.desglose.map(act => {
+        const completada = act.fecha !== "Pendiente";
+        const porcentaje = act.ponderacion > 0 ? Math.round((act.obtenido / act.ponderacion) * 100) : 0;
+        const badgeColor = completada ? (porcentaje >= 80 ? "#dcfce7;color:#15803d" : "#e0f2fe;color:#0369a1") : "#fef3c7;color:#b45309";
+        const badgeText = completada ? "Calificado" : "Pendiente";
+
+        return `
+          <tr>
+            <td><strong>${act.nombre}</strong></td>
+            <td style="color:#5b6b60;font-size:0.86rem;">${act.fecha}</td>
+            <td style="font-weight:600;">${act.ponderacion} pts</td>
+            <td style="font-weight:700;color:${completada ? 'var(--verde-oscuro)' : '#9ca3af'};">
+              ${completada ? act.obtenido + ' pts' : '---'}
+            </td>
+            <td>
+              <span style="display:inline-block;padding:3px 8px;border-radius:12px;font-size:0.75rem;font-weight:700;background:${badgeColor};">
+                ${badgeText}
+              </span>
+            </td>
+            <td style="font-size:0.85rem;color:#4b5563;">${act.retroalimentacion || "-"}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+  }
+
+  modal.style.display = "flex";
+}
+
+function cerrarModalNotas() {
+  const modal = document.getElementById("modal-detalle-notas");
+  if (modal) modal.style.display = "none";
+}
+
+const btnCerrarModalNotas = document.getElementById("btn-cerrar-modal-notas");
+if (btnCerrarModalNotas) btnCerrarModalNotas.addEventListener("click", cerrarModalNotas);
+
+const btnVolverNotas = document.getElementById("btn-volver-notas");
+if (btnVolverNotas) btnVolverNotas.addEventListener("click", cerrarModalNotas);
+
+let listaSemestresHistorialCache = [];
+
+async function cargarHistorial(carnet) {
+  const cont = document.getElementById("contenedor-semestres-historial");
+  if (!cont) return;
+
+  cont.innerHTML = '<p style="text-align:center;color:#7a897f;padding:28px;">Cargando historial académico...</p>';
+
+  try {
+    const resp = await fetch(`/api/estudiantes/${carnet}/historial`);
+    if (!resp.ok) {
+      cont.innerHTML = '<p style="text-align:center;color:#dc2626;padding:28px;">No se pudo cargar el historial académico.</p>';
+      return;
+    }
+
+    const data = await resp.json();
+    listaSemestresHistorialCache = data.semestres || [];
+
+    const txtPromedio = document.getElementById("txt-historial-promedio");
+    const txtCreditos = document.getElementById("txt-historial-creditos");
+    const txtCursos = document.getElementById("txt-historial-cursos");
+    const txtEficiencia = document.getElementById("txt-historial-eficiencia");
+
+    if (txtPromedio) txtPromedio.textContent = (data.promedioAcumulado || 0).toFixed(1);
+    if (txtCreditos) txtCreditos.textContent = data.creditosAprobados || 0;
+    if (txtCursos) txtCursos.textContent = data.cursosAprobados || 0;
+    if (txtEficiencia) txtEficiencia.textContent = data.eficienciaAcademica || "100%";
+
+    renderizarHistorialSemestres(listaSemestresHistorialCache);
+
+    const inputBuscar = document.getElementById("input-buscar-historial");
+    if (inputBuscar) {
+      inputBuscar.value = "";
+      inputBuscar.oninput = (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        if (!query) {
+          renderizarHistorialSemestres(listaSemestresHistorialCache);
+          return;
+        }
+        const filtrados = listaSemestresHistorialCache.map(sem => {
+          const cursosMatch = sem.cursos.filter(c =>
+            c.nombre.toLowerCase().includes(query) ||
+            c.codigo.toLowerCase().includes(query)
+          );
+          return { ...sem, cursos: cursosMatch };
+        }).filter(sem => sem.cursos.length > 0);
+        renderizarHistorialSemestres(filtrados);
+      };
+    }
+  } catch (err) {
+    cont.innerHTML = '<p style="text-align:center;color:#dc2626;padding:28px;">Error al conectar con el servidor.</p>';
+  }
+}
+
+function renderizarHistorialSemestres(semestres) {
+  const cont = document.getElementById("contenedor-semestres-historial");
+  if (!cont) return;
+
+  if (semestres.length === 0) {
+    cont.innerHTML = `
+      <div style="text-align: center; padding: 48px; background: white; border-radius: 12px; border: 1px solid var(--gris-borde);">
+        <h4 style="color: var(--verde-oscuro); margin-bottom: 6px;">No se encontraron asignaturas</h4>
+        <p style="color: #7a897f;">No hay resultados que coincidan con la búsqueda.</p>
+      </div>
+    `;
+    return;
+  }
+
+  cont.innerHTML = semestres.map(sem => {
+    return `
+      <div class="tarjeta-semestre-historial">
+        <div class="semestre-header">
+          <div class="semestre-header-info">
+            <span class="badge-semestre-periodo">${sem.periodo}</span>
+            <h4>Ciclo Finalizado</h4>
+          </div>
+          <div class="semestre-stats">
+            <div class="stat-semestre-item">
+              <span class="stat-sem-label">Créditos aprobados:</span>
+              <strong>${sem.creditosSemestre}</strong>
+            </div>
+            <div class="stat-semestre-item">
+              <span class="stat-sem-label">Promedio de ciclo:</span>
+              <strong style="color:var(--verde-oscuro);">${sem.promedioSemestre} pts</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table class="tabla-estudiante">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nombre del Curso</th>
+                <th>Créditos</th>
+                <th>Nota Final</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sem.cursos.map(c => `
+                <tr>
+                  <td><span class="badge-curso-codigo-sm">${c.codigo}</span></td>
+                  <td><strong>${c.nombre}</strong></td>
+                  <td>${c.creditos} Créditos</td>
+                  <td><strong style="color:var(--verde-oscuro);">${c.notaFinal} pts</strong></td>
+                  <td>
+                    <span class="badge-estado-aprobado">
+                      ${c.estado}
+                    </span>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function cargarPerfil(carnet) {
+  try {
+    const resp = await fetch(`/api/estudiantes/${carnet}/perfil`);
+    if (!resp.ok) return;
+
+    const data = await resp.json();
+
+    const nombreCompleto = data.nombreCompleto || "Estudiante Universitario";
+    const elNombre = document.getElementById("perfil-nombre-completo");
+    if (elNombre) elNombre.textContent = nombreCompleto;
+
+    const elCarnet = document.getElementById("perfil-badge-carnet");
+    if (elCarnet) elCarnet.textContent = "Carnet: " + (data.carnet || carnet);
+
+    const elEstado = document.getElementById("perfil-badge-estado");
+    if (elEstado) elEstado.textContent = data.estado || "Activo Regular";
+
+    const elAvatar = document.getElementById("perfil-avatar-iniciales");
+    if (elAvatar && nombreCompleto) {
+      const p = nombreCompleto.trim().split(" ");
+      elAvatar.textContent = p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : p[0].substring(0, 2).toUpperCase();
+    }
+
+    const setTxt = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val || "---";
+    };
+
+    setTxt("perfil-mini-carrera", data.carrera);
+    setTxt("perfil-mini-promedio", (data.promedioGeneral ? data.promedioGeneral.toFixed(1) : "87.3") + " pts");
+    setTxt("perfil-mini-ingreso", data.fechaIngreso);
+
+    setTxt("perfil-facultad", data.facultad);
+    setTxt("perfil-carrera", data.carrera);
+    setTxt("perfil-campus", data.campus);
+    setTxt("perfil-periodo", data.periodoActual);
+    setTxt("perfil-nacimiento", data.fechaNacimiento);
+    setTxt("perfil-jornada", data.jornada);
+
+    const inpCorreoInst = document.getElementById("perfil-input-correo-inst");
+    const inpCorreoPers = document.getElementById("perfil-input-correo-pers");
+    const inpTelefono = document.getElementById("perfil-input-telefono");
+    const inpDireccion = document.getElementById("perfil-input-direccion");
+
+    if (inpCorreoInst) inpCorreoInst.value = data.correoInstitucional || "";
+    if (inpCorreoPers) inpCorreoPers.value = data.correoPersonal || "";
+    if (inpTelefono) inpTelefono.value = data.telefono || "";
+    if (inpDireccion) inpDireccion.value = data.direccion || "";
+
+    const form = document.getElementById("form-perfil-contacto");
+    if (form) {
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btn-guardar-perfil");
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Guardando...";
+        }
+
+        try {
+          const res = await fetch(`/api/estudiantes/${carnet}/perfil`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              telefono: inpTelefono ? inpTelefono.value : "",
+              direccion: inpDireccion ? inpDireccion.value : ""
+            })
+          });
+
+          const resJson = await res.json();
+          if (res.ok && resJson.ok) {
+            mostrarToast("Datos de contacto actualizados exitosamente");
+          } else {
+            mostrarToast("No se pudieron guardar los cambios", true);
+          }
+        } catch (err) {
+          mostrarToast("Error de conexión al guardar cambios", true);
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Guardar Datos de Contacto";
+          }
+        }
+      };
+    }
+  } catch (err) {
+    console.error("Error al cargar perfil:", err);
   }
 }

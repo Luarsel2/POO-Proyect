@@ -41,21 +41,18 @@
           </a>
         </li>
         <li>
-          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+          <a href="#notas" class="sidebar-link" id="link-nav-notas">
             Mis notas
-            <span class="badge-proximamente">Próximamente</span>
           </a>
         </li>
         <li>
-          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+          <a href="#historial" class="sidebar-link" id="link-nav-historial">
             Historial académico
-            <span class="badge-proximamente">Próximamente</span>
           </a>
         </li>
         <li>
-          <a href="javascript:void(0)" class="sidebar-link deshabilitado" title="Próximamente">
+          <a href="#perfil" class="sidebar-link" id="link-nav-perfil">
             Mi perfil
-            <span class="badge-proximamente">Próximamente</span>
           </a>
         </li>
       </ul>
@@ -286,6 +283,210 @@
           </div>
         </div>
 
+        <div id="vista-notas" class="vista-panel">
+          <div class="banner-info">
+            <div class="banner-info-texto">
+              <h4>Calificaciones y Rendimiento Académico</h4>
+              <p>
+                Consulta el avance de tu zona acumulada, evaluaciones parciales y actividades entregadas para el ciclo en curso. El punteo de examen final se integrará al concluir el semestre oficial.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid-metricas">
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Promedio de zona</span>
+              <span class="valor-principal" id="txt-notas-promedio" style="color:var(--verde-oscuro);">0.0%</span>
+              <span class="subtexto">Rendimiento ponderado</span>
+            </div>
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Cursos en seguimiento</span>
+              <span class="valor-principal" id="txt-notas-cursos">0</span>
+              <span class="subtexto">Materias evaluadas</span>
+            </div>
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Créditos en curso</span>
+              <span class="valor-principal" id="txt-notas-creditos">0</span>
+              <span class="subtexto">Carga total actual</span>
+            </div>
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Estado de zona</span>
+              <span class="valor-principal" id="txt-notas-estado" style="font-size:1.1rem;color:#059669;">Satisfactorio</span>
+              <span class="subtexto">Derecho a examen final</span>
+            </div>
+          </div>
+
+          <div style="margin-top:24px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div>
+              <h3 style="color:var(--verde-oscuro);font-size:1.15rem;margin-bottom:4px;">Asignaturas en Curso</h3>
+              <p style="font-size:0.86rem;color:#5b6b60;">Haz clic en "Ver desglose de notas" en cualquier asignatura para revisar todas tus entregas y parciales.</p>
+            </div>
+            <div class="buscador-caja" style="margin-bottom:0;max-width:320px;">
+              <input type="text" id="input-buscar-notas" class="input-busqueda" placeholder="Filtrar por curso o código...">
+            </div>
+          </div>
+
+          <div id="grid-cursos-notas" class="grid-notas">
+            <p style="text-align:center;color:#7a897f;padding:28px;">Cargando calificaciones...</p>
+          </div>
+        </div>
+
+        <div id="vista-historial" class="vista-panel">
+          <div class="banner-info">
+            <div class="banner-info-texto">
+              <h4>Historial Académico Completo</h4>
+              <p>
+                Registro consolidado de períodos académicos anteriores, materias cursadas, créditos acumulados y promedio general ponderado.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid-metricas">
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Promedio acumulado (GPA)</span>
+              <span class="valor-principal" id="txt-historial-promedio" style="color:var(--verde-oscuro);">0.0</span>
+              <span class="subtexto">Ponderación histórica</span>
+            </div>
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Créditos aprobados</span>
+              <span class="valor-principal" id="txt-historial-creditos">0</span>
+              <span class="subtexto">Avance del pensum</span>
+            </div>
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Cursos aprobados</span>
+              <span class="valor-principal" id="txt-historial-cursos">0</span>
+              <span class="subtexto">Materias completadas</span>
+            </div>
+            <div class="tarjeta-metrica">
+              <span class="etiqueta">Eficiencia académica</span>
+              <span class="valor-principal" id="txt-historial-eficiencia" style="color:#059669;">100%</span>
+              <span class="subtexto">Índice de aprobación</span>
+            </div>
+          </div>
+
+          <div style="margin-top:28px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div>
+              <h3 style="color:var(--verde-oscuro);font-size:1.15rem;margin-bottom:4px;">Ciclos Semestrales Anteriores</h3>
+              <p style="font-size:0.86rem;color:#5b6b60;">Detalle oficial de asignaturas aprobadas por período académico.</p>
+            </div>
+            <div class="buscador-caja" style="margin-bottom:0;max-width:320px;">
+              <input type="text" id="input-buscar-historial" class="input-busqueda" placeholder="Buscar curso en historial...">
+            </div>
+          </div>
+
+          <div id="contenedor-semestres-historial" class="contenedor-historial-semestres">
+            <p style="text-align:center;color:#7a897f;padding:28px;">Cargando historial académico...</p>
+          </div>
+        </div>
+
+        <div id="vista-perfil" class="vista-panel">
+          <div class="banner-info">
+            <div class="banner-info-texto">
+              <h4>Expediente y Perfil del Estudiante</h4>
+              <p>
+                Información oficial de matrícula, registro académico universitario y datos de contacto actualizables.
+              </p>
+            </div>
+          </div>
+
+          <div class="layout-perfil">
+            <div class="columna-perfil-lateral">
+              <div class="tarjeta-perfil-avatar">
+                <div class="avatar-perfil-grande" id="perfil-avatar-iniciales">E</div>
+                <h3 id="perfil-nombre-completo" style="color:var(--verde-oscuro);margin-bottom:4px;">Cargando...</h3>
+                <span class="badge-perfil-carnet" id="perfil-badge-carnet">Carnet: ---</span>
+                <span class="badge-perfil-estado" id="perfil-badge-estado">Activo Regular</span>
+
+                <div class="perfil-stats-mini">
+                  <div class="stat-mini">
+                    <span class="stat-mini-label">Carrera</span>
+                    <strong class="stat-mini-valor" id="perfil-mini-carrera">Ingeniería en Computación</strong>
+                  </div>
+                  <div class="stat-mini">
+                    <span class="stat-mini-label">Promedio Acumulado</span>
+                    <strong class="stat-mini-valor" id="perfil-mini-promedio">87.3 pts</strong>
+                  </div>
+                  <div class="stat-mini">
+                    <span class="stat-mini-label">Año de Ingreso</span>
+                    <strong class="stat-mini-valor" id="perfil-mini-ingreso">2025</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="columna-perfil-principal">
+              <div class="panel-tarjeta">
+                <div class="panel-header">
+                  <div>
+                    <h3>Información Académica Institucional</h3>
+                    <p class="panel-subtitulo">Datos registrados por la Facultad y Departamento de Registro</p>
+                  </div>
+                </div>
+                <div class="grid-campos-perfil">
+                  <div class="campo-dato">
+                    <span class="campo-label">Facultad</span>
+                    <strong class="campo-valor" id="perfil-facultad">Facultad de Ingeniería</strong>
+                  </div>
+                  <div class="campo-dato">
+                    <span class="campo-label">Carrera</span>
+                    <strong class="campo-valor" id="perfil-carrera">Ingeniería en Ciencias de la Computación</strong>
+                  </div>
+                  <div class="campo-dato">
+                    <span class="campo-label">Campus / Sede</span>
+                    <strong class="campo-valor" id="perfil-campus">Campus Central</strong>
+                  </div>
+                  <div class="campo-dato">
+                    <span class="campo-label">Período en curso</span>
+                    <strong class="campo-valor" id="perfil-periodo">Segundo Semestre 2026</strong>
+                  </div>
+                  <div class="campo-dato">
+                    <span class="campo-label">Fecha de Nacimiento</span>
+                    <strong class="campo-valor" id="perfil-nacimiento">---</strong>
+                  </div>
+                  <div class="campo-dato">
+                    <span class="campo-label">Jornada</span>
+                    <strong class="campo-valor" id="perfil-jornada">Mixta</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-tarjeta" style="margin-top:20px;">
+                <div class="panel-header">
+                  <div>
+                    <h3>Datos de Contacto y Residencia</h3>
+                    <p class="panel-subtitulo">Mantén tus datos actualizados para notificaciones universitarias</p>
+                  </div>
+                </div>
+                <form id="form-perfil-contacto" class="formulario-perfil">
+                  <div class="grid-form-perfil">
+                    <div class="campo">
+                      <label for="perfil-input-correo-inst">Correo institucional (No editable)</label>
+                      <input type="text" id="perfil-input-correo-inst" class="input-form" disabled>
+                    </div>
+                    <div class="campo">
+                      <label for="perfil-input-correo-pers">Correo personal de respaldo</label>
+                      <input type="email" id="perfil-input-correo-pers" class="input-form">
+                    </div>
+                    <div class="campo">
+                      <label for="perfil-input-telefono">Teléfono celular / WhatsApp</label>
+                      <input type="tel" id="perfil-input-telefono" class="input-form" placeholder="Ej. 55551234">
+                    </div>
+                    <div class="campo">
+                      <label for="perfil-input-direccion">Dirección domiciliar</label>
+                      <input type="text" id="perfil-input-direccion" class="input-form" placeholder="Dirección de residencia">
+                    </div>
+                  </div>
+                  <div style="margin-top:16px;text-align:right;">
+                    <button type="submit" class="btn-guardar-perfil" id="btn-guardar-perfil">
+                      Guardar Datos de Contacto
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </main>
     </div>
 
@@ -298,6 +499,55 @@
       <div class="modal-acciones">
         <button type="button" class="btn-modal-cancelar" id="btn-cancelar-retiro">Cancelar</button>
         <button type="button" class="btn-modal-confirmar" id="btn-confirmar-retiro">Confirmar Retiro</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-detalle-notas" class="modal-backdrop" style="display:none;">
+    <div class="modal-box modal-box-amplio">
+      <div class="modal-header-curso">
+        <div>
+          <span class="badge-curso-modal" id="modal-nota-codigo">CC2008</span>
+          <h3 id="modal-nota-titulo" style="margin-top:6px;color:var(--verde-oscuro);">Detalle de Evaluaciones</h3>
+          <p id="modal-nota-sub" style="color:#5b6b60;font-size:0.88rem;margin-top:2px;">Docente: ---</p>
+        </div>
+        <button type="button" class="btn-cerrar-modal" id="btn-cerrar-modal-notas">&times;</button>
+      </div>
+
+      <div class="modal-resumen-fila">
+        <div class="resumen-item">
+          <span>Zona acumulada:</span>
+          <strong id="modal-nota-zona">0 / 0 pts</strong>
+        </div>
+        <div class="resumen-item">
+          <span>Examen final:</span>
+          <strong id="modal-nota-final">Pendiente</strong>
+        </div>
+        <div class="resumen-item">
+          <span>Punteo actual:</span>
+          <strong id="modal-nota-total" style="color:var(--verde-oscuro);">0 pts</strong>
+        </div>
+      </div>
+
+      <div class="tabla-contenedor" style="margin-top:20px;">
+        <table class="tabla-estudiante">
+          <thead>
+            <tr>
+              <th>Actividad / Evaluación</th>
+              <th>Fecha</th>
+              <th>Ponderación</th>
+              <th>Obtenido</th>
+              <th>Estado</th>
+              <th>Observación / Retroalimentación</th>
+            </tr>
+          </thead>
+          <tbody id="modal-nota-tabla-cuerpo">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-acciones" style="margin-top:20px;">
+        <button type="button" class="btn-modal-cancelar" id="btn-volver-notas">Cerrar</button>
       </div>
     </div>
   </div>

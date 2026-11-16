@@ -67,6 +67,84 @@ class AsignacionServiceTest {
         service.retirarTodosLosCursos(42);
         assertEquals(cupos - 1, catalogo.buscarSeccionCatalogo(101).getCupoActual());
     }
+    @Test void retirarYReasignarConservaUnSoloCupo() {
+        int cupos = catalogo.buscarSeccionCatalogo(101).getCupoActual();
+        service.asignarCurso(42, Map.of("idSeccion", 101));
+        service.retirarCurso(42, Map.of("idSeccion", 101));
+        assertEquals(true, service.asignarCurso(42, Map.of("idSeccion", 101)).get("ok"));
+        assertEquals(List.of(101), asignaciones.ids);
+        assertEquals(cupos + 1, catalogo.buscarSeccionCatalogo(101).getCupoActual());
+    }
+
+    private SeccionCatalogo agregarTraslape(String dia, String inicio, String fin) {
+        var nueva = new SeccionCatalogo(999, 10, "TEST", "Curso nuevo", 3, "Docente", "Horario",
+            "Matutina", "A", "#000", 30, 0, List.of(new BloqueHorario(dia, inicio, fin, "A")));
+        var secciones = new ArrayList<>(catalogo.obtenerCatalogoSecciones());
+        secciones.add(nueva);
+        CatalogoSeccionRepository prueba = new CatalogoSeccionRepository() {
+            public List<SeccionCatalogo> obtenerCatalogoSecciones() { return secciones; }
+            public SeccionCatalogo buscarSeccionCatalogo(int id) {
+                return secciones.stream().filter(s -> s.idSeccion == id).findFirst().orElse(null);
+            }
+        };
+        service = new AsignacionService(estudiantes, asignaciones, prueba,
+            List.of(new CupoDisponibleRegla(), new CursoUnicoRegla()));
+        return nueva;
+    }
+
+    @Test void traslapeRequiereConfirmacionYReemplazaSoloLosConflictos() {
+        var nueva = agregarTraslape("Lunes", "08:00", "09:00");
+        for (int id : List.of(101, 102, 103)) service.asignarCurso(42, Map.of("idSeccion", id));
+        int cupos = catalogo.buscarSeccionCatalogo(101).getCupoActual();
+        var respuesta = service.asignarCurso(42, Map.of("idSeccion", 999));
+        assertEquals("TRASLAPE", respuesta.get("tipo"));
+        assertEquals(List.of(101, 103), respuesta.get("conflictos"));
+        assertTrue(respuesta.get("mensaje").toString().contains("Programación Orientada a Objetos"));
+        assertTrue(respuesta.get("mensaje").toString().contains("Cálculo I"));
+        assertEquals(List.of(101, 102, 103), asignaciones.ids);
+        assertEquals(cupos, catalogo.buscarSeccionCatalogo(101).getCupoActual());
+        assertEquals(true, service.asignarCurso(42,
+            Map.of("idSeccion", 999, "reemplazarSecciones", respuesta.get("conflictos"))).get("ok"));
+        assertEquals(List.of(102, 999), asignaciones.ids);
+        assertEquals(cupos - 1, catalogo.buscarSeccionCatalogo(101).getCupoActual());
+        assertEquals(1, nueva.getCupoActual());
+    }
+
+    @Test void confirmacionDesactualizadaNoRetiraCursos() {
+        agregarTraslape("Lunes", "08:00", "09:00");
+        service.asignarCurso(42, Map.of("idSeccion", 101));
+        service.asignarCurso(42, Map.of("idSeccion", 103));
+        assertEquals("TRASLAPE", service.asignarCurso(42,
+            Map.of("idSeccion", 999, "reemplazarSecciones", List.of(101))).get("tipo"));
+        assertEquals(List.of(101, 103), asignaciones.ids);
+    }
+
+    @Test void reemplazoSinCupoOConErrorDeGuardadoConservaCursoAnterior() {
+        var nueva = agregarTraslape("Lunes", "08:00", "08:30");
+        service.asignarCurso(42, Map.of("idSeccion", 101));
+        int cupos = catalogo.buscarSeccionCatalogo(101).getCupoActual();
+        var solicitud = Map.<String, Object>of("idSeccion", 999, "reemplazarSecciones", List.of(101));
+        while (nueva.getCupoActual() < nueva.cupoMaximo) nueva.reservarCupo();
+        assertEquals(false, service.asignarCurso(42, solicitud).get("ok"));
+        assertEquals(List.of(101), asignaciones.ids);
+        nueva.liberarCupo();
+        asignaciones.fallar = true;
+        assertThrows(IllegalStateException.class, () -> service.asignarCurso(42, solicitud));
+        assertEquals(List.of(101), asignaciones.ids);
+        assertEquals(cupos, catalogo.buscarSeccionCatalogo(101).getCupoActual());
+        assertEquals(29, nueva.getCupoActual());
+    }
+
+    @Test void horariosContiguosYDiasDistintosNoTraslapan() {
+        agregarTraslape("Lunes", "08:30", "08:45");
+        service.asignarCurso(42, Map.of("idSeccion", 101));
+        service.asignarCurso(42, Map.of("idSeccion", 103));
+        assertEquals(true, service.asignarCurso(42, Map.of("idSeccion", 999)).get("ok"));
+        service.retirarCurso(42, Map.of("idSeccion", 999));
+        agregarTraslape("Martes", "07:00", "08:30");
+        assertEquals(true, service.asignarCurso(42, Map.of("idSeccion", 999)).get("ok"));
+    }
+
     private static class MemoriaAsignaciones implements AsignacionRepository {
         List<Integer> ids = List.of(); boolean fallar;
         public List<Integer> obtenerAsignacionesPorCarnet(int carnet) { return ids; }

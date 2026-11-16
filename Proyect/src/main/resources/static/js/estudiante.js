@@ -288,7 +288,7 @@ function renderizarAsignacion(carnet) {
       } else if (!tieneCupo) {
         botonHtml = `<button type="button" class="btn-accion-seccion sin-cupo" disabled>Sin cupo disponible</button>`;
       } else {
-        botonHtml = `<button type="button" class="btn-accion-seccion asignar" data-carnet="${carnet}" data-id-seccion="${sec.idSeccion}" onclick="ejecutarAsignacion(${carnet}, ${sec.idSeccion})">+ Inscribir Sección ${sec.codigo}</button>`;
+        botonHtml = `<button type="button" class="btn-accion-seccion asignar" data-carnet="${carnet}" data-id-seccion="${sec.idSeccion}">+ Inscribir Sección ${sec.codigo}</button>`;
       }
 
       return `
@@ -380,26 +380,48 @@ async function retirarTodoElHorario(carnet) {
 window.asignarHorario = asignarHorario;
 window.retirarTodoElHorario = retirarTodoElHorario;
 
+let asignacionEnCurso = false;
+
+function confirmarTraslape(mensaje) {
+  const modal = document.getElementById("modal-traslape");
+  document.getElementById("modal-traslape-texto").textContent = mensaje;
+  modal.returnValue = "cancelar";
+  return new Promise(resolve => {
+    modal.addEventListener("close", () => resolve(modal.returnValue === "reemplazar"), { once: true });
+    modal.showModal();
+  });
+}
+
 async function ejecutarAsignacion(carnet, idSeccion) {
+  if (asignacionEnCurso) return;
+  asignacionEnCurso = true;
   const c = carnet || window.carnetActual;
-  const s = parseInt(idSeccion, 10);
+  const solicitud = { idSeccion: parseInt(idSeccion, 10) };
   try {
-    const resp = await fetch(`/api/estudiantes/${c}/asignar-curso`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idSeccion: s })
-    });
-    const data = await resp.json();
-    if (resp.ok && data.ok) {
-      mostrarToast(data.mensaje || "Curso asignado exitosamente");
-      await cargarAsignacion(c);
-      await cargarDashboard(c);
-      await cargarHorario(c);
-    } else {
+    while (true) {
+      const resp = await fetch(`/api/estudiantes/${c}/asignar-curso`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(solicitud)
+      });
+      const data = await resp.json();
+      if (resp.ok && data.ok) {
+        mostrarToast(data.mensaje || "Curso asignado exitosamente");
+        await Promise.allSettled([cargarAsignacion(c), cargarDashboard(c), cargarHorario(c)]);
+        break;
+      }
+      if (data.tipo === "TRASLAPE") {
+        if (!await confirmarTraslape(data.mensaje)) break;
+        solicitud.reemplazarSecciones = data.conflictos;
+        continue;
+      }
       mostrarToast(data.mensaje || "No se pudo realizar la asignación", true);
+      break;
     }
   } catch (err) {
     mostrarToast("Error de conexión al asignar curso", true);
+  } finally {
+    asignacionEnCurso = false;
   }
 }
 

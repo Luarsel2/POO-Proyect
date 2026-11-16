@@ -31,6 +31,16 @@ public class AsignacionService {
         if (anteriores.contains(id)) return error("Ya estás inscrito en esta sección.");
         List<SeccionCatalogo> propuestas = new ArrayList<>(secciones(anteriores));
         propuestas.removeIf(s -> s.codigoCurso.equalsIgnoreCase(nueva.codigoCurso));
+        List<SeccionCatalogo> conflictos = propuestas.stream().filter(s -> traslapan(s, nueva)).toList();
+        List<Integer> idsConflictos = conflictos.stream().map(s -> s.idSeccion).toList();
+        if (!conflictos.isEmpty() && !idsConflictos.equals(req.get("reemplazarSecciones"))) {
+            String nombres = String.join(", ", conflictos.stream()
+                .map(s -> s.nombreCurso + " (Sección " + s.codigoSeccion + ")").toList());
+            return Map.of("ok", false, "tipo", "TRASLAPE", "conflictos", idsConflictos,
+                "mensaje", "No se puede asignar " + nueva.nombreCurso + " porque se traslapa con " + nombres
+                    + ". ¿Quieres retirar " + nombres + " y asignarte " + nueva.nombreCurso + "?");
+        }
+        propuestas.removeAll(conflictos);
         propuestas.add(nueva);
         Optional<String> problema = guardarSeleccion(carnet, anteriores, propuestas);
         if (problema.isPresent()) return error(problema.get());
@@ -82,6 +92,14 @@ public class AsignacionService {
             Optional<String> problema = regla.validar(anteriores, seleccion);
             if (problema.isPresent()) return problema;
         }
+        for (int i = 0; i < seleccion.size(); i++) {
+            for (int j = i + 1; j < seleccion.size(); j++) {
+                if (traslapan(seleccion.get(i), seleccion.get(j))) {
+                    return Optional.of("El curso " + seleccion.get(i).nombreCurso + " se traslapa con "
+                        + seleccion.get(j).nombreCurso + ".");
+                }
+            }
+        }
         List<Integer> nuevosIds = seleccion.stream().map(s -> s.idSeccion).toList();
         // La escritura ocurre antes de modificar cupos; un error no deja una selección parcial.
         asignaciones.guardarAsignaciones(carnet, nuevosIds);
@@ -92,6 +110,13 @@ public class AsignacionService {
 
     private List<SeccionCatalogo> secciones(List<Integer> ids) {
         return ids.stream().map(catalogo::buscarSeccionCatalogo).filter(Objects::nonNull).toList();
+    }
+
+    private boolean traslapan(SeccionCatalogo a, SeccionCatalogo b) {
+        return a.bloques.stream().anyMatch(x -> b.bloques.stream().anyMatch(y ->
+            x.dia().equalsIgnoreCase(y.dia())
+                && java.time.LocalTime.parse(x.horaInicio()).isBefore(java.time.LocalTime.parse(y.horaFin()))
+                && java.time.LocalTime.parse(y.horaInicio()).isBefore(java.time.LocalTime.parse(x.horaFin()))));
     }
 
     private Integer idSeccion(Map<String, Object> req) {

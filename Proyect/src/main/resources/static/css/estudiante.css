@@ -1594,3 +1594,13 @@ table.tabla-estudiante tbody tr:hover { background-color: var(--verde-fondo); }
     width: 100%;
   }
 }
+
+#modal-traslape {
+  margin: auto;
+  border: none;
+}
+
+#modal-traslape::backdrop {
+  background: rgba(11, 77, 51, 0.4);
+  backdrop-filter: blur(4px);
+}

@@ -599,12 +599,12 @@ table.tabla-estudiante tbody tr:hover { background-color: var(--verde-fondo); }
 
 .jornada-matutina {
   background: #e0f2fe;
-  color: #0369a1;
+  color: #059669;
 }
 
 .jornada-nocturna {
   background: #f3e8ff;
-  color: #6b21a8;
+  color: #059669;
 }
 
 .btn-accion-seccion {
@@ -1038,12 +1038,12 @@ table.tabla-estudiante tbody tr:hover { background-color: var(--verde-fondo); }
 }
 
 .tarjeta-opcion-horario.matutina .tarjeta-opcion-badge {
-  background: #0284c7;
+  background: #059669;
   color: #ffffff;
 }
 
 .tarjeta-opcion-horario.nocturna .tarjeta-opcion-badge {
-  background: #7c3aed;
+  background: #059669;
   color: #ffffff;
 }
 
@@ -1105,21 +1105,21 @@ table.tabla-estudiante tbody tr:hover { background-color: var(--verde-fondo); }
 }
 
 .btn-asignar-opcion.matutina {
-  background: #0284c7;
+  background: #059669;
   color: #ffffff;
 }
 
 .btn-asignar-opcion.matutina:hover {
-  background: #0369a1;
+  background: #059669;
 }
 
 .btn-asignar-opcion.nocturna {
-  background: #7c3aed;
+  background: #059669;
   color: #ffffff;
 }
 
 .btn-asignar-opcion.nocturna:hover {
-  background: #6d28d9;
+  background: #059669;
 }
 
 .grid-notas {

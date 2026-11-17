@@ -267,7 +267,7 @@ body.pagina-login {
 .login-boton:active { transform: translateY(1px); }
 .login-boton:disabled { opacity: .65; cursor: wait; }
 
-/* Botón Estudiantil – tono verde más claro para diferenciarlo */
+/* Botón Estudiantil 
 .login-boton--estudiante {
   background: linear-gradient(135deg, var(--verde), var(--verde-claro));
   color: var(--blanco);
@@ -279,7 +279,7 @@ body.pagina-login {
   box-shadow: 0 6px 16px rgba(20, 113, 63, 0.40);
 }
 
-/* Botón Administrativo – tono verde oscuro */
+/* Botón Administrativo 
 .login-boton--admin {
   background: linear-gradient(135deg, var(--verde-oscuro), var(--verde));
   color: var(--blanco);

@@ -111,9 +111,9 @@ public class Seccion {
     }
 
     public List<Horario> getHorario(){
-        return horarios;
+        return List.copyOf(horarios);
     }
     public void setHorario(List<Horario> horarios){
-        this.horarios = horarios;
+        this.horarios = new ArrayList<>(horarios);
     }
 }

@@ -2,103 +2,179 @@ package com.uvg.pooproyect.controller;
 
 import com.uvg.pooproyect.dto.Requests.EstudianteRequest;
 import com.uvg.pooproyect.model.Estudiante;
-import com.uvg.pooproyect.persistencia.CsvUtil;
-import jakarta.annotation.PostConstruct;
+import com.uvg.pooproyect.service.EstudianteService;
+import com.uvg.pooproyect.service.ConsultaAcademicaService;
+import com.uvg.pooproyect.service.AsignacionService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-// Version REST del EstudianteController original. La logica es la misma,
-// solo que ahora cada metodo queda expuesto como un endpoint HTTP que el
-// portal puede llamar, y la lista se guarda en data/estudiantes.csv para
-// que los datos sobrevivan a un reinicio del servidor.
 @RestController
 @RequestMapping("/api/estudiantes")
 public class EstudianteController {
 
-    private static final String ARCHIVO = "estudiantes.csv";
+    private final EstudianteService estudianteService;
+    private final ConsultaAcademicaService consultaService;
+    private final AsignacionService asignacionService;
 
-    private final List<Estudiante> listaEstudiantes = new ArrayList<>();
-
-    // Se ejecuta una sola vez, cuando arranca el servidor: recupera lo que
-    // ya se había guardado en el archivo .csv en una corrida anterior.
-    @PostConstruct
-    public void cargar() {
-        for (String[] col : CsvUtil.leerFilas(ARCHIVO)) {
-            Estudiante e = new Estudiante(
-                    CsvUtil.leerEntero(col[0], 0), col[1], col[2], col[3], col[4],
-                    CsvUtil.leerEntero(col[5], 0), col[6], CsvUtil.leerEntero(col[7], 0),
-                    CsvUtil.leerEntero(col[8], 0), col[9], CsvUtil.leerDecimal(col[10], 0),
-                    null, null, CsvUtil.leerEntero(col[11], 0)
-            );
-            listaEstudiantes.add(e);
-        }
+    public EstudianteController(EstudianteService estudianteService, ConsultaAcademicaService consultaService, AsignacionService asignacionService) {
+        this.consultaService = consultaService;
+        this.asignacionService = asignacionService;
+        this.estudianteService = estudianteService;
     }
 
-    // Reescribe el archivo .csv completo con lo que hay actualmente en memoria.
-    private void guardar() {
-        List<String[]> filas = new ArrayList<>();
-        for (Estudiante e : listaEstudiantes) {
-            filas.add(new String[]{
-                    String.valueOf(e.getId()), CsvUtil.escapar(e.getNombre()), CsvUtil.escapar(e.getApellido()),
-                    CsvUtil.escapar(e.getFechaNacimiento()), CsvUtil.escapar(e.getCorreo()),
-                    String.valueOf(e.getTelefono()), CsvUtil.escapar(e.getDireccion()),
-                    String.valueOf(e.getCarnet()), String.valueOf(e.getFechaIngreso()),
-                    CsvUtil.escapar(e.getEstado()), String.valueOf(e.getPromedioGeneral()),
-                    String.valueOf(e.getHistorialAcademico().getIdHistorial())
-            });
-        }
-        CsvUtil.escribirFilas(ARCHIVO, filas);
-    }
-
-    // Registrar estudiante interactuando directamente con el modelo
     @PostMapping
-    public Map<String, String> registrarEstudiante(@RequestBody EstudianteRequest req) {
-
-        Estudiante nuevoEstudiante = new Estudiante(
-                req.id(), req.nombre(), req.apellido(), req.fechaNacimiento(), req.correo(),
-                req.telefono(), req.direccion(), req.carnet(), req.fechaIngreso(), req.estado(),
-                req.promedioGeneral(), null, null, req.idHistorial()
-        );
-
-        listaEstudiantes.add(nuevoEstudiante);
-        guardar();
-        return Map.of("mensaje", "Estudiante " + req.nombre() + " " + req.apellido()
-                + " registrado exitosamente. Carnet: " + req.carnet());
+    public ResponseEntity<Map<String, String>> registrarEstudiante(@RequestBody EstudianteRequest req) {
+        return ResponseEntity.ok(estudianteService.registrarEstudiante(req));
     }
 
-    // Ejecutar lógica de negocio del modelo
     @PostMapping("/{carnet}/inscribir-curso")
-    public Map<String, String> inscribirCursoAEstudiante(@PathVariable int carnet) {
-        Estudiante estudiante = buscarPorCarnetInterno(carnet);
-
-        if (estudiante != null) {
-            estudiante.inscribirCurso();
-            return Map.of("mensaje", "Curso inscrito exitosamente para el carnet: " + carnet);
-        }
-
-        return Map.of("mensaje", "Error: Estudiante con carnet " + carnet + " no encontrado.");
+    public ResponseEntity<Map<String, String>> inscribirCursoAEstudiante(@PathVariable("carnet") int carnet) {
+        return ResponseEntity.ok(estudianteService.inscribirCurso(carnet));
     }
 
-    // Buscar estudiante por carnet
     @GetMapping("/{carnet}")
-    public Estudiante buscarPorCarnet(@PathVariable int carnet) {
-        return buscarPorCarnetInterno(carnet);
-    }
-
-    private Estudiante buscarPorCarnetInterno(int carnet) {
-        for (Estudiante e : listaEstudiantes) {
-            if (e.getCarnet() == carnet) {
-                return e;
-            }
-        }
-        return null;
+    public Estudiante buscarPorCarnet(@PathVariable("carnet") int carnet) {
+        return estudianteService.buscarPorCarnet(carnet);
     }
 
     @GetMapping
     public List<Estudiante> obtenerTodos() {
-        return listaEstudiantes;
+        return estudianteService.obtenerTodos();
+    }
+
+    @GetMapping({"/dashboard", "/{carnet}/dashboard"})
+    public ResponseEntity<Map<String, Object>> obtenerDashboardEstudiante(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            HttpSession sesion) {
+        Map<String, Object> resp = consultaService.obtenerDashboard(resolverCarnet(carnet, sesion));
+        if (resp == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping({"/cursos-disponibles", "/{carnet}/cursos-disponibles"})
+    public ResponseEntity<Map<String, Object>> obtenerCursosDisponibles(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            HttpSession sesion) {
+        return ResponseEntity.ok(consultaService.obtenerCursosDisponibles(resolverCarnet(carnet, sesion)));
+    }
+
+    @PostMapping({"/asignar-curso", "/{carnet}/asignar-curso"})
+    public ResponseEntity<Map<String, Object>> asignarCurso(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            @RequestBody Map<String, Object> req,
+            HttpSession sesion) {
+        Map<String, Object> res = asignacionService.asignarCurso(resolverCarnet(carnet, sesion), req);
+        if (Boolean.FALSE.equals(res.get("ok"))) {
+            return ResponseEntity.badRequest().body(res);
+        }
+        return ResponseEntity.ok(res);
+    }
+
+    @PostMapping({"/asignar-horario", "/{carnet}/asignar-horario"})
+    public ResponseEntity<Map<String, Object>> asignarHorarioCompleto(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            @RequestBody Map<String, Object> req,
+            HttpSession sesion) {
+        Map<String, Object> res = asignacionService.asignarHorarioCompleto(resolverCarnet(carnet, sesion), req);
+        if (Boolean.FALSE.equals(res.get("ok"))) {
+            return ResponseEntity.badRequest().body(res);
+        }
+        return ResponseEntity.ok(res);
+    }
+
+    @PostMapping({"/retirar-todos", "/{carnet}/retirar-todos"})
+    public ResponseEntity<Map<String, Object>> retirarTodosLosCursos(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            HttpSession sesion) {
+        Map<String, Object> res = asignacionService.retirarTodosLosCursos(resolverCarnet(carnet, sesion));
+        if (Boolean.FALSE.equals(res.get("ok"))) {
+            return ResponseEntity.badRequest().body(res);
+        }
+        return ResponseEntity.ok(res);
+    }
+
+    @PostMapping({"/retirar-curso", "/{carnet}/retirar-curso"})
+    public ResponseEntity<Map<String, Object>> retirarCurso(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            @RequestBody Map<String, Object> req,
+            HttpSession sesion) {
+        Map<String, Object> res = asignacionService.retirarCurso(resolverCarnet(carnet, sesion), req);
+        if (Boolean.FALSE.equals(res.get("ok"))) {
+            return ResponseEntity.badRequest().body(res);
+        }
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping({"/horario", "/{carnet}/horario"})
+    public ResponseEntity<Map<String, Object>> obtenerHorarioEstudiante(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            HttpSession sesion) {
+        return ResponseEntity.ok(consultaService.obtenerHorario(resolverCarnet(carnet, sesion)));
+    }
+
+    @GetMapping({"/notas", "/{carnet}/notas"})
+    public ResponseEntity<Map<String, Object>> obtenerNotasEstudiante(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            HttpSession sesion) {
+        Map<String, Object> resp = consultaService.obtenerNotas(resolverCarnet(carnet, sesion));
+        if (resp == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping({"/historial", "/{carnet}/historial"})
+    public ResponseEntity<Map<String, Object>> obtenerHistorialEstudiante(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            HttpSession sesion) {
+        Map<String, Object> resp = consultaService.obtenerHistorial(resolverCarnet(carnet, sesion));
+        if (resp == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping({"/perfil", "/{carnet}/perfil"})
+    public ResponseEntity<Map<String, Object>> obtenerPerfilEstudiante(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            HttpSession sesion) {
+        Map<String, Object> resp = estudianteService.obtenerPerfil(resolverCarnet(carnet, sesion));
+        if (resp == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(resp);
+    }
+
+    @PutMapping({"/perfil", "/{carnet}/perfil"})
+    public ResponseEntity<Map<String, Object>> actualizarPerfilEstudiante(
+            @PathVariable(value = "carnet", required = false) Integer carnet,
+            @RequestBody Map<String, Object> datos,
+            HttpSession sesion) {
+        Map<String, Object> resp = estudianteService.actualizarPerfil(resolverCarnet(carnet, sesion), datos);
+        if (resp == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(resp);
+    }
+
+    private int resolverCarnet(Integer carnet, HttpSession sesion) {
+        if (carnet != null && carnet > 0) {
+            return carnet;
+        }
+        if (sesion != null) {
+            Object sc = sesion.getAttribute("carnet");
+            if (sc != null) {
+                try {
+                    return Integer.parseInt(sc.toString());
+                } catch (Exception ignored) {}
+            }
+        }
+        return 26547;
     }
 }

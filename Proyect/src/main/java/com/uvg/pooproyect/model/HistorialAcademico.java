@@ -43,6 +43,6 @@ public class HistorialAcademico {
     }
 
     public List<Curso> getCursosArobados(){
-        return cursosAprobados;
+        return List.copyOf(cursosAprobados);
     }
 }

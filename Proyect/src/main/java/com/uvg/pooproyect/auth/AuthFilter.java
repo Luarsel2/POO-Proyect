@@ -10,9 +10,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-
 @Component
 public class AuthFilter extends OncePerRequestFilter {
+
+    private final ConsultaCuenta consultaCuenta;
+
+    public AuthFilter(ConsultaCuenta consultaCuenta) {
+        this.consultaCuenta = consultaCuenta;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse resp, FilterChain chain)
@@ -21,6 +26,14 @@ public class AuthFilter extends OncePerRequestFilter {
         String path = req.getRequestURI();
         HttpSession sesion = req.getSession(false);
         String rol = sesion == null ? null : (String) sesion.getAttribute("rol");
+
+        // Si el administrador eliminó la cuenta de este estudiante, se cierra su sesión.
+        if (Roles.ESTUDIANTE.equals(rol)
+                && !consultaCuenta.existe((Integer) sesion.getAttribute("carnet"))) {
+            sesion.invalidate();
+            sesion = null;
+            rol = null;
+        }
 
         // "/" manda a cada quien a su pantalla
         if (path.equals("/")) {
@@ -40,42 +53,53 @@ public class AuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (AuthController.ROL_ADMIN.equals(rol)) {
-            chain.doFilter(req, resp);
+        // El administrador tiene acceso a todo el panel administrativo y APIs
+        if (Roles.ADMIN.equals(rol)) {
+            chain.doFilter(req, resp);   // si el estudiante es admin, lo deja pasar
             return;
         }
 
-        // lo de estudiantes perros
-        if (esApi) {
-            if (estudiantePuedeUsarApi(req.getMethod(), path, sesion)) {
+        // El estudiante solo tiene acceso a sus vistas y a sus endpoints autorizados
+        if (Roles.ESTUDIANTE.equals(rol)) {
+            if (esApi) { // revisa que el estudiante este intentando obtener o guardar datos puros en la base de datos
+                if (estudiantePuedeUsarApi(req.getMethod(), path, sesion)) {
+                    chain.doFilter(req, resp);// evalua si el estudiante tiene permiso para usar esa ruta de
+                    // API en específico, revisando qué acción quiere hacer, a qué ruta y quién es es decir su sesión.
+                } else {
+                    denegar(resp, true, 403, null);
+                }
+                return;
+            }
+
+            // Páginas HTML permitidas al estudiante
+            if (path.equals("/dashboard-estudiante.html") || path.equals("/cursos-estudiante.html")
+                    || path.equals("/vista-estudiante.html")) {
                 chain.doFilter(req, resp);
             } else {
-                denegar(resp, true, 403, null);
+                // Redirige al portal estudiantil si intenta acceder a páginas administrativas
+                resp.sendRedirect("/dashboard-estudiante.html");
             }
             return;
         }
 
-        if (path.equals("/vista-estudiante.html")) {
-            chain.doFilter(req, resp);
-        } else {
-            resp.sendRedirect("/vista-estudiante.html");
-        }
+        denegar(resp, esApi, 403, "/login.html");
     }
 
-
-
     private boolean estudiantePuedeUsarApi(String metodo, String path, HttpSession sesion) {
-        if (!metodo.equals("GET")) return false;
-        if (path.equals("/api/cursos") || path.equals("/api/secciones") || path.equals("/api/periodos")) {
+        if (path.startsWith("/api/estudiantes/") || path.equals("/api/estudiantes")) {
             return true;
         }
-        Object carnet = sesion.getAttribute("carnet");
-        return carnet != null && path.equals("/api/estudiantes/" + carnet);   // solo sus propios datos
+        if (path.equals("/api/cursos") || path.equals("/api/secciones") || path.equals("/api/periodos")
+                || path.equals("/api/carreras") || path.equals("/api/facultades")
+                || path.startsWith("/api/auth/")) {
+            return true;
+        }
+        return false;
     }
 
     private String destinoSegunRol(String rol) {
-        if (AuthController.ROL_ADMIN.equals(rol)) return "/index.html";
-        if (AuthController.ROL_ESTUDIANTE.equals(rol)) return "/vista-estudiante.html";
+        if (Roles.ADMIN.equals(rol)) return "/index.html";
+        if (Roles.ESTUDIANTE.equals(rol)) return "/dashboard-estudiante.html";
         return "/login.html";
     }
 

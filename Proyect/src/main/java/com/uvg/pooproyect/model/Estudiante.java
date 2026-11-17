@@ -17,7 +17,7 @@ public class Estudiante extends Persona {
         this.carnet = carnet;
         this.fechaIngreso = fechaIngreso;
         this.estado = estado;
-        this.promedioGeneral = promedioGeneral;
+        setPromedioGeneral(promedioGeneral);
         this.inscripcion = inscripcion;
         this.curso = curso;
         this.historialAcademico = new HistorialAcademico(idHistorial);
@@ -66,6 +66,9 @@ public class Estudiante extends Persona {
         return promedioGeneral;
     }
     public void setPromedioGeneral(double promedioGeneral){
+        if (!Double.isFinite(promedioGeneral) || promedioGeneral < 0 || promedioGeneral > 100) {
+            throw new IllegalArgumentException("El promedio debe estar entre 0 y 100.");
+        }
         this.promedioGeneral = promedioGeneral;
     }
 

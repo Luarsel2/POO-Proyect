@@ -85,7 +85,7 @@ public class Inscripcion {
     }
 
     public List<DetalleInscripcion> getDetalles(){
-        return detalles;
+        return List.copyOf(detalles);
     }
 
 }

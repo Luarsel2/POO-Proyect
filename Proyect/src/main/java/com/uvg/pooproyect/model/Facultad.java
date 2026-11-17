@@ -33,10 +33,10 @@ public class Facultad {
     }
 
     public List<Departamento> getDepartamentos(){
-        return departamentos;
+        return List.copyOf(departamentos);
     }
 
     public List<Carrera> getCarreras(){
-        return carreras;
+        return List.copyOf(carreras);
     }
 }
